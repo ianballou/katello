@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Testing orphans: create a repo, sync it, then delete the repo.  Task: delete_orphaned_content
+# Testing missing repos: Create a repo and then delete the Pulp 2 repo. Task: correct_repositories
+#    -> Try running migration without running task to see how it behaves.
+# XXX Make sure to set PULP_CONCURRENCY to 8 in /etc/default/pulp_workers
+
+username="admin"
+password="changeme"
+
+if [ "$1" == "--setup" ]; then
+
+	# Prepare repositories
+
+	hammer --username $username --password $password product create --organization-label Default_Organization --name test_product
+
+	hammer --username $username --password $password repository create --organization-label Default_Organization --product test_product --name large_file --content-type file --url  http://quartet.usersys.redhat.com/pub/fake-repos/large_file/
+	hammer --username $username --password $password repository create --organization-label Default_Organization --product test_product --url https://registry-1.docker.io --docker-upstream-name library/busybox --content-type docker --name busybox
+	hammer --username $username --password $password repository create --organization-label Default_Organization --product test_product --url https://registry-1.docker.io --docker-upstream-name library/bash --content-type docker --name bash
+	hammer --username $username --password $password repository create --organization-label Default_Organization --product test_product --url https://registry-1.docker.io --docker-upstream-name library/alpine --content-type docker --name alpine
+
+	hammer --username $username --password $password product synchronize --organization-label Default_Organization --name test_product
+
+	for i in {1..50}
+	do 
+		hammer --username $username --password $password repository create --product test_product --organization-label Default_Organization --name large_file$i --content-type file --url  http://quartet.usersys.redhat.com/pub/fake-repos/large_file/
+		hammer --username $username --password $password repository create --product test_product --organization-label Default_Organization --url https://registry-1.docker.io --docker-upstream-name library/busybox --content-type docker --name busybox$i
+		hammer --username $username --password $password repository synchronize --name busybox$i --organization-label Default_Organization --product test_product --async
+		hammer --username $username --password $password repository create --product test_product --organization-label Default_Organization --url https://registry-1.docker.io --docker-upstream-name library/bash --content-type docker --name bash$i
+		hammer --username $username --password $password repository synchronize --name bash$i --organization-label Default_Organization --product test_product --async
+		hammer --username $username --password $password repository create --product test_product --organization-label Default_Organization --url https://registry-1.docker.io --docker-upstream-name library/alpine --content-type docker --name alpine$i
+		hammer --username $username --password $password repository synchronize --name alpine$i --organization-label Default_Organization --product test_product --async
+		hammer --username $username --password $password repository synchronize --name large_file$i --organization-label Default_Organization --product test_product
+	done
+
+	
+	# Prepare large content view
+
+	hammer --username $username --password $password content-view create --organization-label Default_Organization --name large_view
+	hammer --username $username --password $password content-view add-repository --repository "busybox" --name large_view --organization-label Default_Organization
+	hammer --username $username --password $password content-view add-repository --repository "bash" --name large_view --organization-label Default_Organization
+	hammer --username $username --password $password content-view add-repository --repository "alpine" --name large_view --organization-label Default_Organization
+
+	# Publish views with only docker repos
+	for i in {1..90}
+	do
+		hammer --username $username --password $password content-view publish --name large_view --organization-label Default_Organization
+	done
+
+	hammer --username $username --password $password content-view add-repository --repository "large_file" --name large_view --organization-label Default_Organization
+
+	# Publish views with file and docker repos
+	for i in {1..5}
+	do
+		hammer --username $username --password $password content-view publish --name large_view --organization-label Default_Organization
+	done
+
+	hammer --username $username --password $password content-view remove-repository --repository "busybox" --name large_view --organization-label Default_Organization
+	hammer --username $username --password $password content-view remove-repository --repository "bash" --name large_view --organization-label Default_Organization
+	hammer --username $username --password $password content-view remove-repository --repository "alpine" --name large_view --organization-label Default_Organization
+
+	# Publish views with only file repos
+	for i in {1..5}
+	do
+		hammer --username $username --password $password content-view publish --name large_view --organization-label Default_Organization
+	done
+
+	# Create and publish many small content views
+
+	for i in {1..100}
+	do
+	   hammer --username $username --password $password content-view create --name little_view$i --organization-label Default_Organization
+	   hammer --username $username --password $password content-view add-repository --repository "busybox" --name little_view$i --organization-label Default_Organization
+	   hammer --username $username --password $password content-view add-repository --repository "bash" --name little_view$i --organization-label Default_Organization
+	   hammer --username $username --password $password content-view add-repository --repository "alpine" --name little_view$i --organization-label Default_Organization
+    	done
+
+	for i in {1..100}
+	do
+		hammer --username $username --password $password content-view publish --name little_view$i --organization-label Default_Organization
+	done
+
+	# Prepare upload-only repositories
+
+	mkdir migration_test_files
+	for i in {1..10}; do touch migration_test_files/$i.iso; done;
+
+	for i in {1..5}
+	do
+		hammer --username $username --password $password repository create --organization-label Default_Organization --product test_product --name file_upload_repo$i --content-type file
+		hammer --username $username --password $password repository upload-content --path "migration_test_files/*" --name file_upload_repo$i --product test_product --organization-label Default_Organization
+	done
+
+	# TODO: Orphan some content
+
+	# TODO: Make some missing repos
+
+fi
+
+#time sudo foreman-rake katello:pulp3_migration
+#time sudo foreman-rake katello:pulp3_content_switchover
+
+echo "Testing Pulp3 migration of many file and docker repositories"
