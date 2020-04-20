@@ -84,6 +84,8 @@ module Katello
     param :ostree_branch_id, String, :desc => N_("Id of an ostree branch to find repositories that contain that branch")
     param :library, :bool, :desc => N_("show repositories in Library and the default content view")
     param :archived, :bool, :desc => N_("show archived repositories")
+    param :skip_view_filter, :bool, :desc => N_("show all repositories")
+    param :docker_tag_id, :number, :desc => N_("ID of a docker tag to show repositories of")
     param :content_type, RepositoryTypeManager.repository_types.keys, :desc => N_("limit to only repositories of this type")
     param :name, String, :desc => N_("name of the repository"), :required => false
     param :label, String, :desc => N_("label of the repository"), :required => false
@@ -120,6 +122,13 @@ module Katello
 
     def index_relation
       query = Repository.readable
+      unless params[:docker_tag_id].nil?
+        if ::Foreman::Cast.to_bool params[:archived]
+          query = DockerMetaTag.find(params[:docker_tag_id]).repositories.readable
+        else
+          query = DockerMetaTag.find(params[:docker_tag_id]).repositories.non_archived.readable
+        end
+      end
       query = query.with_content(params[:with_content]) if params[:with_content]
       query = index_relation_product(query)
       query = query.with_type(params[:content_type]) if params[:content_type]
@@ -149,7 +158,9 @@ module Katello
     end
 
     def index_relation_environment(query)
-      if params[:environment_id] && !params[:library]
+      if params[:skip_view_filter]
+        query
+      elsif params[:environment_id] && !params[:library]
         query = query.where(:environment_id => params[:environment_id])
       elsif params[:environment_id] && params[:library]
         instances = query.where(:environment_id => params[:environment_id])
