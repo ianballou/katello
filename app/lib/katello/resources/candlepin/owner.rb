@@ -55,6 +55,7 @@ module Katello
                 path = join_path('candlepin', response['statusPath'][1..-1])
                 response_json = self.get(path, self.default_headers)
                 response = JSON.parse(response_json).with_indifferent_access
+                sleep(1)
               end
             end
 
