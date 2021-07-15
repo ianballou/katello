@@ -34,7 +34,7 @@ module Actions
 
         def import_module_streams(payload, host)
           enabled_payload = payload.map do |profile|
-            profile.slice("name", "stream", "version", "context", "arch").with_indifferent_access if profile["status"] == "enabled"
+            profile.slice("name", "stream", "version", "context", "arch").with_indifferent_access if profile["status"] == "enabled" && profile["active"] == true
           end
           enabled_payload.compact!
 
