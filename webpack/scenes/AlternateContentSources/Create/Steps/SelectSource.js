@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { translate as __ } from 'foremanReact/common/I18n';
-import { Flex, FlexItem, Form, FormGroup, FormSelect, FormSelectOption, Tile } from '@patternfly/react-core';
+import { Button, Flex, FlexItem, Form, FormGroup, FormSelect, FormSelectOption, Popover, PopoverPosition, Text, Tile } from '@patternfly/react-core';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import ACSCreateContext from '../ACSCreateContext';
 import WizardHeader from '../../../ContentViews/components/WizardHeader';
 
@@ -30,6 +31,21 @@ const SelectSource = () => {
         title={__('Select source type')}
         description={__('Indicate the source type.')}
       />
+      <Popover
+        appendTo={() => document.body}
+        aria-label="selectSource-rhui-tip-popover"
+        position={PopoverPosition.top}
+        bodyContent={
+          <>
+            {__('Select the Custom alternate content source type for RHUI.')}
+          </>
+        }
+      >
+        <Button ouiaId="source-type-rhui-info" style={{ padding: '8px' }} variant="plain" aria-label="popoverButton">
+          <OutlinedQuestionCircleIcon />
+          <Text>RHUI tip</Text>
+        </Button>
+      </Popover>
       <Form>
         <FormGroup
           label={__('Source type')}
