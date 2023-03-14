@@ -38,6 +38,7 @@ module Katello
       get: Net::HTTP::Get,
       post: Net::HTTP::Post,
       put: Net::HTTP::Put,
+      patch: Net::HTTP::Patch,
       delete: Net::HTTP::Delete
     }.freeze
 
@@ -84,7 +85,8 @@ module Katello
       def issue_request(method:, path:, headers: {}, payload: nil)
         logger.debug("Resource #{method.upcase} request: #{path}")
         logger.debug "Headers: #{headers.to_json}"
-        logger.debug "Body: #{filter_sensitive_data(payload.to_json)}"
+        # FIXME: StringIO object call to_json failing on container image blob payload
+        # logger.debug "Body: #{filter_sensitive_data(payload.to_json)}"
 
         client = rest_client(REQUEST_MAP[method], method, path)
         args = [method, payload, headers].compact

@@ -9,7 +9,7 @@ module Katello
     before_action :optional_authorize, only: [:token, :catalog]
     before_action :registry_authorize, except: [:token, :v1_search, :catalog]
     before_action :authorize_repository_read, only: [:pull_manifest, :tags_list]
-    before_action :authorize_repository_write, only: [:push_manifest]
+    # before_action :authorize_repository_write, only: [:push_manifest]
     skip_before_action :check_media_type, only: [:start_upload_blob, :upload_blob, :finish_upload_blob,
                                                  :chunk_upload_blob, :push_manifest]
 
@@ -169,15 +169,8 @@ module Katello
     end
 
     def check_blob
-      begin
-        r = Resources::Registry::Proxy.get(@_request.fullpath, 'Accept' => request.headers['Accept'])
-        response.header['Content-Length'] = "#{r.body.size}"
-      rescue RestClient::NotFound
-        digest_file = tmp_file("#{params[:digest][7..-1]}.tar")
-        raise unless File.exist? digest_file
-        response.header['Content-Length'] = "#{File.size digest_file}"
-      end
-      render json: {}
+      r = Resources::Registry::Proxy.get(@_request.fullpath, 'Accept' => request.headers['Accept'])
+      head r.code
     end
 
     def redirect_client
@@ -199,29 +192,12 @@ module Katello
 
     # FIXME: Reimplement for Pulp 3.
     def push_manifest
-      repository = params[:repository]
-      tag = params[:tag]
-
-      manifest = create_manifest
-      return if manifest.nil?
-
-      begin
-        files = get_manifest_files(repository, manifest)
-        return if files.nil?
-
-        tar_file = create_tar_file(files, repository, tag)
-        return if tar_file.nil?
-
-        digest = upload_manifest(tar_file)
-        return if digest.nil?
-
-        tag = upload_tag(digest, tag)
-        return if tag.nil?
-      ensure
-        File.delete(tmp_file('manifest.json')) if File.exist? tmp_file('manifest.json')
+      body = @_request.body.read
+      pulp_response = Resources::Registry::Proxy.put(@_request.fullpath, body, translated_headers_for_proxy)
+      pulp_response.headers.each do |key,value|
+        response.header[key.to_s] = value
       end
-
-      render json: {}
+      head pulp_response.code
     end
 
     # FIXME: This is referring to a non-existent Pulp 2 server.
@@ -231,11 +207,15 @@ module Katello
     end
 
     def start_upload_blob
-      uuid = SecureRandom.hex(16)
-      response.header['Location'] = "#{request_url}/v2/#{params[:repository]}/blobs/uploads/#{uuid}"
-      response.header['Docker-Upload-UUID'] = uuid
-      response.header['Range'] = '0-0'
-      head 202
+      headers = {}
+      headers['Accept'] = request.headers['Accept'] if request.headers['Accept']
+      headers['Authorization'] = request.headers['Authorization']
+      pulp_response = Resources::Registry::Proxy.post(@_request.fullpath, @_request.body, headers)
+
+      pulp_response.headers.each do |key,value|
+        response.header[key.to_s] = value
+      end
+      head pulp_response.code
     end
 
     def status_upload_blob
@@ -250,37 +230,39 @@ module Katello
       render plain: '', status: :accepted
     end
 
+    def translated_headers_for_proxy
+      current_headers = {}
+      env = request.env.select do |key, _value|
+        key.match("^HTTP_.*")
+      end
+      env.each do |header|
+        current_headers[header[0].split('_')[1..-1].join('-')] = header[1]
+      end
+      current_headers
+    end
+
+
     def upload_blob
-      File.open(tmp_file("#{params[:uuid]}.tar"), 'ab', 0600) do |file|
-        file.write request.body.read
+      headers = translated_headers_for_proxy
+      #      headers['TRANSFER-ENCODING'] = "chunked"
+      body = @_request.body.read
+      pulp_response = Resources::Registry::Proxy.patch(@_request.fullpath, body, headers)
+
+      pulp_response.headers.each do |key,value|
+        response.header[key.to_s] = value
       end
 
-      # ???? true chunked data?
-      if request.headers['Content-Range']
-        render_error 'unprocessable_entity', :status => :unprocessable_entity
-      end
-
-      response.header['Location'] = "#{request_url}/v2/#{params[:repository]}/blobs/uploads/#{params[:uuid]}"
-      response.header['Range'] = "1-#{request.body.size}"
-      response.header['Docker-Upload-UUID'] = params[:uuid]
-      head 204
+      head pulp_response.code
     end
 
     def finish_upload_blob
-      # error by client if no params[:digest]
+      pulp_response = Resources::Registry::Proxy.put(@_request.fullpath, @_request.body, translated_headers_for_proxy)
 
-      uuid_file = tmp_file("#{params[:uuid]}.tar")
-      digest_file = tmp_file("#{params[:digest][7..-1]}.tar")
+      pulp_response.headers.each do |key,value|
+        response.header[key.to_s] = value
+      end
 
-      File.delete(digest_file) if File.exist? digest_file
-      File.rename(uuid_file, digest_file)
-
-      response.header['Location'] = "#{request_url}/v2/#{params[:repository]}/blobs/#{params[:digest]}"
-      response.header['Docker-Content-Digest'] = params[:digest]
-      response.header['Content-Range'] = "1-#{File.size(digest_file)}"
-      response.header['Content-Length'] = "0"
-      response.header['Docker-Upload-UUID'] = params[:uuid]
-      head 201
+      head pulp_response.code
     end
 
     def cancel_upload_blob
