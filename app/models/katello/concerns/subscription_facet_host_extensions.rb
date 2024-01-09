@@ -21,6 +21,8 @@ module Katello
 
         accepts_nested_attributes_for :subscription_facet, :update_only => true, :reject_if => lambda { |attrs| attrs.values.compact.empty? }
 
+        delegate :hypervisor, :to => :subscription_facet, :allow_nil => true
+
         has_many :activation_keys, :through => :subscription_facet
         has_many :pools, :through => :subscription_facet
         has_many :purpose_addons, :through => :subscription_facet

@@ -595,7 +595,7 @@ class ::Host::Managed::Jail < Safemode::Jail
         :installed_packages, :traces_helpers, :advisory_ids, :package_names_for_job_template,
         :filtered_entitlement_quantity_consumed, :bound_repositories,
         :single_content_view, :single_lifecycle_environment, :purpose_role, :purpose_usage, :release_version,
-        :purpose_role_status_label, :purpose_usage_status_label
+        :purpose_role_status_label, :purpose_usage_status_label, :hypervisor
 end
 
 class ActiveRecord::Associations::CollectionProxy::Jail < Safemode::Jail
