@@ -506,6 +506,12 @@ Foreman::Plugin.register :katello do
         full_name: N_('Sync Smart Proxies after content view promotion'),
         description: N_("Whether or not to auto sync the Smart Proxies after a content view promotion.")
 
+      setting 'smart_proxy_repository_sharing',
+        type: :boolean,
+        default: false,
+        full_name: N_('Enable Smart Proxy repository sharing'),
+        description: N_("When enabled, smart proxies will share Pulp repositories for identical content across different lifecycle environments, reducing storage usage and PostgreSQL database size.")
+
       setting 'download_rate_limit',
         type: :integer,
         default: 0,

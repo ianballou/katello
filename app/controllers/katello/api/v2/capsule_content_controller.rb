@@ -147,6 +147,37 @@ module Katello
       respond_for_async :resource => task
     end
 
+    api :GET, '/capsules/:id/content/sharing_analyze', N_('Analyze repository sharing opportunities')
+    param :id, :number, :desc => N_('Id of the smart proxy'), :required => true
+    def sharing_analyze
+      find_capsule(false)
+      task = async_task(::Actions::Katello::CapsuleContent::AnalyzeRepositorySharing, @capsule)
+      respond_for_async :resource => task
+    end
+
+    api :POST, '/capsules/:id/content/sharing_consolidate', N_('Consolidate duplicate repositories using sharing')
+    param :id, :number, :desc => N_('Id of the smart proxy'), :required => true
+    def sharing_consolidate
+      find_editable_capsule
+      task = async_task(::Actions::Katello::CapsuleContent::ConsolidateRepositories, @capsule)
+      respond_for_async :resource => task
+    end
+
+    api :GET, '/capsules/:id/content/sharing_estimate', N_('Estimate space savings from repository sharing')
+    param :id, :number, :desc => N_('Id of the smart proxy'), :required => true
+    def sharing_estimate
+      find_capsule(false)
+      content_mapper = ::Katello::SmartProxyContentRepositoryMapper.new(@capsule)
+      savings = content_mapper.estimate_space_savings
+      
+      render :json => {
+        smart_proxy_id: @capsule.id,
+        smart_proxy_name: @capsule.name,
+        sharing_enabled: Setting[:smart_proxy_repository_sharing],
+        space_savings: savings
+      }
+    end
+
     protected
 
     def respond_for_lifecycle_environments_index(environments)

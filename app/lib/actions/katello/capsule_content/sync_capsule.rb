@@ -31,7 +31,11 @@ module Actions
               concurrence do
                 repo_batch.each do |repo|
                   if smart_proxy.pulp3_support?(repo)
-                    plan_action(Actions::Pulp3::CapsuleContent::Sync,
+                    sync_action = repository_sharing_enabled? ? 
+                      Actions::Pulp3::CapsuleContent::SharedSync :
+                      Actions::Pulp3::CapsuleContent::Sync
+                    
+                    plan_action(sync_action,
                       repo, smart_proxy,
                       skip_metadata_check: skip_metadata_check)
                   end
@@ -99,6 +103,12 @@ To update content counts manually, run the 'Update Content Counts' action."
 
         def rescue_strategy
           Dynflow::Action::Rescue::Skip
+        end
+
+        private
+
+        def repository_sharing_enabled?
+          Setting[:smart_proxy_repository_sharing] == true
         end
       end
     end
