@@ -9,12 +9,12 @@ attributes :checksum
 attributes :description
 attributes :nav
 attributes :nva
-attributes :pulp_id
-attributes :pulp_id => :uuid
 attributes :section
 attributes :maintainer
 attributes :homepage
 attributes :installed_size
+attributes :pulp_prn => :pulp_id
+attributes :pulp_prn => :uuid
 
 node(:hosts_available_count) { |m| m.hosts_available(params[:organization_id]).count }
 node(:hosts_applicable_count) { |m| m.hosts_applicable(params[:organization_id]).count }

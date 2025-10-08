@@ -39,7 +39,7 @@ module Katello
       end
       package_filenames.concat(repo.packages_without_errata.map(&:filename)) if self.original_packages
       rpms = Rpm.in_repositories(repo)
-      rpms.where(filename: package_filenames).where(:modular => false).pluck(:pulp_id).flatten.uniq
+      rpms.where(filename: package_filenames).where(:modular => false).pluck(:pulp_prn).flatten.uniq
     end
 
     def self.generate_rpm_clauses(package_filenames = [])

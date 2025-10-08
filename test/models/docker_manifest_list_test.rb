@@ -13,7 +13,7 @@ module Katello
 
     def test_import_for_repository
       Katello::DockerManifestList.import_for_repository(@repo)
-      assert_equal @manifest_lists.first[:pulp_href], @repo.docker_manifest_lists.first.pulp_id
+      assert_equal @manifest_lists.first[:pulp_href], @repo.docker_manifest_lists.first.pulp_prn
       assert_equal @manifest_lists.first[:digest], @repo.docker_manifest_lists.first.digest
     end
 

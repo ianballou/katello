@@ -24,20 +24,20 @@ module Katello
 
         pulp3_enabled_repo_types.each do |repo_type|
           api = repo_type.pulp3_api(smart_proxy)
-          version_hrefs = api.repository_versions
-          orphan_version_hrefs = api.list_all.collect do |pulp_repo|
-            mirror_repo_versions = api.versions_list_for_repository(pulp_repo.pulp_href, ordering: ['-pulp_created'])
-            version_hrefs = mirror_repo_versions.select { |repo_version| repo_version.number != 0 }.collect { |version| version.pulp_href }
+          version_prns = api.repository_versions
+          orphan_version_prns = api.list_all.collect do |pulp_repo|
+            mirror_repo_versions = api.versions_list_for_repository(pulp_repo.prn, ordering: ['-pulp_created'])
+            version_prns = mirror_repo_versions.select { |repo_version| repo_version.number != 0 }.collect { |version| version.prn }
 
-            version_hrefs - [pulp_repo.latest_version_href]
+            version_prns - [pulp_repo.latest_version_href]
           end
-          repo_version_map[api] = orphan_version_hrefs.flatten
+          repo_version_map[api] = orphan_version_prns.flatten
         end
 
         repo_version_map
       end
 
-      def report_misconfigured_repository_version(api, href)
+      def report_misconfigured_repository_version(api, prn)
         # Reasons for distributions distributing orphaned repository versions:
         # 1. The sync succeeded but Pulp did not update the publication (yum content)
         #    - Fix: completely resync the repository to the smart proxy (need to verify)
@@ -52,12 +52,12 @@ module Katello
         #    - Fix: delete the orphan distribution
         errors = []
         related_distributions = if api.repository_type.publications_api_class.present?
-                                  publication_hrefs = api.publications_list_all(repository_version: href).map(&:pulp_href)
+                                  publication_prns = api.publications_list_all(repository_version: prn).map(&:prn)
                                   # Searching distributions by publication isn't supported
-                                  api.distributions_list_all.select { |dist| publication_hrefs.include? dist.publication }
+                                  api.distributions_list_all.select { |dist| publication_prns.include? dist.publication }
                                 else
                                   # Searching distributions by repository version isn't supported
-                                  api.distributions_list_all.select { |dist| dist.repository_version == href }
+                                  api.distributions_list_all.select { |dist| dist.repository_version == prn }
                                 end
         repositories_to_redistribute = ::Katello::Repository.where(pulp_id: related_distributions.map(&:name))
         if repositories_to_redistribute.present?
@@ -69,8 +69,8 @@ module Katello
           errors << warning
           Rails.logger.warn(warning)
         end
-        Rails.logger.debug("Orphan cleanup error: investigate the version_href #{href} on the smart proxy with ID #{smart_proxy.id} " \
-                            "and the related distributions #{related_distributions.map(&:pulp_href)}")
+        Rails.logger.debug("Orphan cleanup error: investigate the version_prn #{prn} on the smart proxy with ID #{smart_proxy.id} " \
+                            "and the related distributions #{related_distributions.map(&:prn)}")
         Rails.logger.debug('It is likely that the related distributions are distributing an older version of the repository.')
         errors
       end
@@ -79,12 +79,12 @@ module Katello
       def delete_orphan_repository_versions
         tasks = []
         errors = []
-        orphan_repository_versions.each do |api, version_hrefs|
-          version_hrefs.each do |href|
-            tasks << api.repository_versions_api.delete(href)
+        orphan_repository_versions.each do |api, version_prns|
+          version_prns.each do |prn|
+            tasks << api.repository_versions_api.delete(prn)
           rescue => e
             if e.message.include?('Please update the necessary distributions first.')
-              errors << report_misconfigured_repository_version(api, href)
+              errors << report_misconfigured_repository_version(api, prn)
             else
               raise e
             end
@@ -98,7 +98,7 @@ module Katello
 
         orphaned_repositories.each do |api, pulp3_repo_list|
           tasks << pulp3_repo_list.collect do |repo|
-            api.repositories_api.delete(repo.pulp_href)
+            api.repositories_api.delete(repo.prn)
           end
         end
 
@@ -109,7 +109,7 @@ module Katello
         tasks = []
         pulp3_enabled_repo_types.each do |repo_type|
           orphan_distributions(repo_type).each do |distribution|
-            tasks << repo_type.pulp3_api(smart_proxy).delete_distribution(distribution.pulp_href)
+            tasks << repo_type.pulp3_api(smart_proxy).delete_distribution(distribution.prn)
           end
         end
         tasks
@@ -118,7 +118,7 @@ module Katello
       def orphan_distributions(repo_type)
         api = repo_type.pulp3_api(smart_proxy)
         api.distributions_list_all.select do |distribution|
-          dist = api.get_distribution(distribution.pulp_href)
+          dist = api.get_distribution(distribution.prn)
           self.class.orphan_distribution?(dist)
         end
       end
@@ -132,22 +132,22 @@ module Katello
 
       def delete_orphan_alternate_content_sources
         tasks = []
-        known_acs_hrefs = []
+        known_acs_prns = []
         known_acss = smart_proxy.smart_proxy_alternate_content_sources
-        known_acs_hrefs = known_acss.pluck(:alternate_content_source_href) if known_acss.present?
+        known_acs_prns = known_acss.pluck(:alternate_content_source_prn) if known_acss.present?
 
         if RepositoryTypeManager.enabled_repository_types['file']
           file_acs_api = ::Katello::Pulp3::Repository.api(smart_proxy, 'file').alternate_content_source_api
-          orphan_file_acs_hrefs = file_acs_api.list.results.map(&:pulp_href) - known_acs_hrefs
-          orphan_file_acs_hrefs.each do |orphan_file_acs_href|
-            tasks << file_acs_api.delete(orphan_file_acs_href)
+          orphan_file_acs_prns = file_acs_api.list.results.map(&:prn) - known_acs_prns
+          orphan_file_acs_prns.each do |orphan_file_acs_prn|
+            tasks << file_acs_api.delete(orphan_file_acs_prn)
           end
         end
         if RepositoryTypeManager.enabled_repository_types['yum']
           yum_acs_api = ::Katello::Pulp3::Repository.api(smart_proxy, 'yum').alternate_content_source_api
-          orphan_yum_acs_hrefs = yum_acs_api.list.results.map(&:pulp_href) - known_acs_hrefs
-          orphan_yum_acs_hrefs.each do |orphan_yum_acs_href|
-            tasks << yum_acs_api.delete(orphan_yum_acs_href)
+          orphan_yum_acs_prns = yum_acs_api.list.results.map(&:prn) - known_acs_prns
+          orphan_yum_acs_prns.each do |orphan_yum_acs_prn|
+            tasks << yum_acs_api.delete(orphan_yum_acs_prn)
           end
         end
       end
@@ -156,14 +156,14 @@ module Katello
         tasks = []
         smart_proxy_helper = ::Katello::SmartProxyHelper.new(smart_proxy)
         repo_names = smart_proxy_helper.combined_repos_available_to_capsule.map(&:pulp_id)
-        acs_remotes = Katello::SmartProxyAlternateContentSource.pluck(:remote_href)
+        acs_remotes = Katello::SmartProxyAlternateContentSource.pluck(:remote_prn)
         pulp3_enabled_repo_types.each do |repo_type|
           api = repo_type.pulp3_api(smart_proxy)
           remotes = api.remotes_list_all(smart_proxy)
 
           remotes.each do |remote|
-            if !repo_names.include?(remote.name) && !acs_remotes.include?(remote.pulp_href)
-              tasks << api.delete_remote(remote.pulp_href)
+            if !repo_names.include?(remote.name) && !acs_remotes.include?(remote.prn)
+              tasks << api.delete_remote(remote.prn)
             end
           end
         end

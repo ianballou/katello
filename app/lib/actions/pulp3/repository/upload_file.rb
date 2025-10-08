@@ -16,7 +16,7 @@ module Actions
           response = nil
           File.open(input[:file], "rb") do |file|
             total_size = File.size(file)
-            upload_href = uploads_api.create(upload_class.new(size: total_size)).pulp_href
+            upload_prn = uploads_api.create(upload_class.new(size: total_size)).prn
             sha256 = Digest::SHA256.hexdigest(File.read(file))
             until file.eof?
               chunk = file.read(upload_chunk_size)
@@ -25,7 +25,7 @@ module Actions
                 filechunk.write(chunk)
                 filechunk.flush
                 actual_chunk_size = File.size(filechunk)
-                response = uploads_api.update(content_range(offset, offset + actual_chunk_size - 1, total_size), upload_href, filechunk)
+                response = uploads_api.update(content_range(offset, offset + actual_chunk_size - 1, total_size), upload_prn, filechunk)
                 offset += actual_chunk_size
               ensure
                 filechunk.close
@@ -34,17 +34,17 @@ module Actions
             end
 
             if response
-              upload_href = response.pulp_href
+              upload_prn = response.prn
               #Check for any duplicate artifacts created in parallel subtasks
               duplicate_sha_artifact_list = ::Katello::Pulp3::Api::Core.new(smart_proxy).artifacts_api.list("sha256": sha256)
-              duplicate_sha_artifact_href = duplicate_sha_artifact_list&.results&.first&.pulp_href
-              if duplicate_sha_artifact_href
-                uploads_api.delete(upload_href)
-                output[:artifact_href] = duplicate_sha_artifact_href
+              duplicate_sha_artifact_prn = duplicate_sha_artifact_list&.results&.first&.prn
+              if duplicate_sha_artifact_prn
+                uploads_api.delete(upload_prn)
+                output[:artifact_prn] = duplicate_sha_artifact_prn
                 output[:pulp_tasks] = nil
               else
-                output[:artifact_href] = nil
-                output[:pulp_tasks] = [uploads_api.commit(upload_href, sha256: sha256)]
+                output[:artifact_prn] = nil
+                output[:pulp_tasks] = [uploads_api.commit(upload_prn, sha256: sha256)]
               end
             end
           end

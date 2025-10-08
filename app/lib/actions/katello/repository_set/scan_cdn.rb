@@ -42,11 +42,11 @@ module Actions
         def prepare_result(substitutions, _path)
           mapper = repository_mapper(substitutions)
           repo = mapper.find_repository
-          unique_id = repo.try(:pulp_id) || SecureRandom.uuid
+          unique_id = repo.try(:repository_prn) || SecureRandom.uuid
           { substitutions: substitutions,
             path: mapper.path,
             repo_name: mapper.name,
-            pulp_id: unique_id,
+            repository_prn: unique_id,
             name: mapper.content.name,
             enabled: !repo.nil?,
             promoted: (!repo.nil? && repo.promoted?),

@@ -6,20 +6,20 @@ module Katello
   class DockerMetaTagTest < ActiveSupport::TestCase
     extend ActiveRecord::TestFixtures
 
-    def gen_pulp_id
+    def gen_pulp_prn
       "random-pulp-id-#{rand(999_999)}"
     end
 
     def setup
       @repo = Repository.find(katello_repositories(:busybox).id)
-      @tag_schema2 = create(:docker_tag, :with_manifest_list, :repositories => [@repo], :name => "latest", :pulp_id => gen_pulp_id)
-      @tag_schema1 = create(:docker_tag, :schema1, :repositories => [@repo], :name => "latest", :pulp_id => gen_pulp_id)
+      @tag_schema2 = create(:docker_tag, :with_manifest_list, :repositories => [@repo], :name => "latest", :pulp_prn => gen_pulp_prn)
+      @tag_schema1 = create(:docker_tag, :schema1, :repositories => [@repo], :name => "latest", :pulp_prn => gen_pulp_prn)
 
       @repo.library_instances_inverse.each do |repo|
         tag1 = @tag_schema1.dup
-        tag1.pulp_id = gen_pulp_id
+        tag1.pulp_prn = gen_pulp_prn
         tag2 = @tag_schema2.dup
-        tag2.pulp_id = gen_pulp_id
+        tag2.pulp_prn = gen_pulp_prn
 
         repo.docker_tags << tag1
         repo.docker_tags << tag2
@@ -46,7 +46,7 @@ module Katello
       meta_one = DockerMetaTag.create!(:name => @tag_schema1.name, :schema1 => @tag_schema1, :repositories => [@repo])
       DockerMetaTag.create!(:name => @tag_schema2.name, :schema2 => @tag_schema2, :repositories => [@repo])
 
-      result = DockerMetaTag.with_pulp_id(meta_one.id)
+      result = DockerMetaTag.with_pulp_prn(meta_one.id)
 
       assert_includes result, meta_one
       assert_equal 1, result.length
@@ -73,7 +73,7 @@ module Katello
       assert_empty DockerMetaTag.where(:schema1 => @tag_schema1.id)
       assert_equal 1, DockerMetaTag.where(:schema2 => @tag_schema2.id).count
 
-      @tag_schema1 = create(:docker_tag, :schema1, :repositories => [@repo], :name => "latest", :pulp_id => gen_pulp_id)
+      @tag_schema1 = create(:docker_tag, :schema1, :repositories => [@repo], :name => "latest", :pulp_prn => gen_pulp_prn)
       DockerMetaTag.import_meta_tags([@repo])
       old_meta = meta
 
@@ -94,7 +94,7 @@ module Katello
       assert_equal @tag_schema1.repositories.first, tags.first.repositories.first
       assert_equal 1, tags.count
 
-      new_tag = create(:docker_tag, :schema1, :repositories => [@repo], :pulp_id => gen_pulp_id)
+      new_tag = create(:docker_tag, :schema1, :repositories => [@repo], :pulp_prn => gen_pulp_prn)
       DockerMetaTag.import_meta_tags([@repo])
 
       tags = DockerMetaTag.in_repositories(@repo, true).pluck(:name)

@@ -33,7 +33,7 @@ module ::Actions::Katello::ContentViewVersion
       stub_remote_user
       @rpm = library_repo.rpms.first
 
-      new_repo = ::Katello::Repository.new(:pulp_id => 387, :library_instance_id => library_repo.id, :root => library_repo.root)
+      new_repo = ::Katello::Repository.new(:pulp_prn => 387, :library_instance_id => library_repo.id, :root => library_repo.root)
       repository_mapping = {}
       repository_mapping[[library_repo]] = new_repo
       Dynflow::Testing::DummyPlannedAction.any_instance.stubs(:repository_mapping).returns(repository_mapping)
@@ -53,7 +53,7 @@ module ::Actions::Katello::ContentViewVersion
       end
 
       let(:new_repo) do
-        ::Katello::Repository.new(:pulp_id => 387, :library_instance_id => library_repo.id, :root => library_repo.root)
+        ::Katello::Repository.new(:pulp_prn => 387, :library_instance_id => library_repo.id, :root => library_repo.root)
       end
 
       let(:library_repo) do

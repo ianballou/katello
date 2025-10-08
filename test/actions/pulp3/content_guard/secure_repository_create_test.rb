@@ -27,7 +27,7 @@ module ::Actions::Pulp3
       content_guard = ::Katello::Pulp3::ContentGuard.first
       assert content_guard
       distribution = Katello::Pulp3::DistributionReference.where(repository_id: @repo.id).first
-      assert_equal content_guard.pulp_href, distribution.content_guard_href
+      assert_equal content_guard.pulp_prn, distribution.content_guard_prn
     end
   end
 end

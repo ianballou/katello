@@ -1,11 +1,11 @@
 one:
   digest: one
-  pulp_id: one
+  pulp_prn: one
 
 two:
   digest: two
-  pulp_id: two
+  pulp_prn: two
 
 three:
   digest: three
-  pulp_id: three
+  pulp_prn: three

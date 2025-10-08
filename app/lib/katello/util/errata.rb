@@ -51,9 +51,9 @@ module Katello
         return [] if content_pulp_hrefs.empty?
 
         source_repo_rpm_filenames = source_repo_rpm_filenames.map { |rpm| File.basename(rpm) }
-        rpm_filenames = Katello::Rpm.where(:pulp_id => content_pulp_hrefs).map { |rpm| File.basename(rpm.filename) }
-        srpm_filenames = Katello::Srpm.where(:pulp_id => content_pulp_hrefs).map { |srpm| File.basename(srpm.filename) }
-        module_stream_specs = Katello::ModuleStream.where(:pulp_id => content_pulp_hrefs).map(&:module_spec)
+        rpm_filenames = Katello::Rpm.where(:pulp_prn => content_pulp_hrefs).map { |rpm| File.basename(rpm.filename) }
+        srpm_filenames = Katello::Srpm.where(:pulp_prn => content_pulp_hrefs).map { |srpm| File.basename(srpm.filename) }
+        module_stream_specs = Katello::ModuleStream.where(:pulp_prn => content_pulp_hrefs).map(&:module_spec)
 
         matching_errata = []
         errata.each do |erratum|

@@ -13,7 +13,7 @@ module Katello
       end
 
       def self.backend_unit_identifier
-        "pulp_href"
+        "prn"
       end
 
       def self.supports_id_fetch?
@@ -23,14 +23,14 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::Yum.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
       def self.generate_model_row(unit)
-        keys = %w(title id severity issued_date type description reboot_suggested solution updated_date summary)
+        keys = %w(title id severity issued_date type description reboot_suggested solution updated_date summary prn)
         custom_json = unit.slice(*keys)
         custom_json.inject(HashWithIndifferentAccess.new({})) { |h, (k, v)| h.merge({ k => v.respond_to?(:strip) ? v.strip : v }) }
-        custom_json['pulp_id'] = custom_json['id']
+        custom_json['pulp_prn'] = custom_json.delete('prn')
         custom_json["issued"] = custom_json.delete("issued_date")
         custom_json["updated"] = custom_json.delete("updated_date")
         custom_json['title'] = custom_json['title']&.truncate(255)
@@ -46,14 +46,14 @@ module Katello
         custom_json
       end
 
-      def self.insert_child_associations(units, pulp_id_to_id)
+      def self.insert_child_associations(units, pulp_prn_to_id)
         bugzillas = []
         cves = []
         packages = []
         modules = []
 
         units.each do |unit|
-          katello_id = pulp_id_to_id[unit['id']]
+          katello_id = pulp_prn_to_id[unit['id']]
           bugzillas += build_bugzillas(katello_id, unit['references'])
           cves += build_cves(katello_id, unit['references'])
           packages += build_packages(katello_id, unit['pkglist'])
@@ -63,7 +63,7 @@ module Katello
         Katello::ErratumCve.insert_all(cves, unique_by: [:erratum_id, :cve_id, :href]) if cves.any?
         Katello::ErratumPackage.insert_all(packages, unique_by: [:erratum_id, :nvrea, :name, :filename]) if packages.any?
         units.each do |unit|
-          katello_id = pulp_id_to_id[unit['id']]
+          katello_id = pulp_prn_to_id[unit['id']]
           modules += build_modules(katello_id, unit['pkglist'])
         end
         ModuleStreamErratumPackage.insert_all(modules, unique_by: [:module_stream_id, :erratum_package_id]) if modules.any?

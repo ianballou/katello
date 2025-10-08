@@ -111,7 +111,7 @@ module Katello
 
     def test_show_by_uuid
       Pulp3::PackageGroup.any_instance.stubs(:backend_data).returns({ 'packages' => [] })
-      get :show, params: { :id => @repo.package_groups.first.pulp_id }
+      get :show, params: { :id => @repo.package_groups.first.pulp_prn }
 
       assert_response :success
     end

@@ -12,7 +12,7 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::Docker.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
       def self.content_unit_list(page_opts)
@@ -26,7 +26,7 @@ module Katello
         {
           schema_version: unit['schema_version'],
           digest: unit['digest'],
-          pulp_id: unit[unit_identifier],
+          pulp_prn: unit[unit_identifier],
           annotations: unit['annotations'],
           labels: unit['labels'],
           is_bootable: unit['is_bootable'] || unit['type'] == 'bootable',

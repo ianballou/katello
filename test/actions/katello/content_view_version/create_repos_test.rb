@@ -20,7 +20,7 @@ module Katello::Host
       end
 
       it 'plans with default values' do
-        new_repo = ::Katello::Repository.new(:pulp_id => 387, :library_instance_id => library_repo.id, :root => library_repo.root)
+        new_repo = ::Katello::Repository.new(:pulp_prn => 387, :library_instance_id => library_repo.id, :root => library_repo.root)
         repositories = [[library_repo]]
         library_repo.expects(:build_clone).with(content_view: @version.content_view, version: @version).returns(new_repo)
         plan_action(action, @version, repositories)

@@ -1,10 +1,11 @@
 object @resource
 
-attributes :id, :pulp_id, :title, :errata_id
+attributes :id, :title, :errata_id
 attributes :issued, :updated, :version, :status, :release
 attributes :severity, :description, :solution, :summary, :reboot_suggested
 attributes :_href
-attributes :pulp_id => :uuid
+attributes :pulp_prn => :pulp_id
+attributes :pulp_prn => :uuid
 
 child :cves => :cves do
   attributes :cve_id, :href

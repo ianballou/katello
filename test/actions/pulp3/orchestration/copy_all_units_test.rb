@@ -159,7 +159,7 @@ module ::Actions::Pulp3
       refute_includes @repo_clone.rpms.pluck(:name), "crow"
       refute_includes @repo_clone.rpms.pluck(:name), "duck"
       refute_includes @repo_clone.rpms.pluck(:name), "stork"
-      refute_includes @repo_clone.errata.pluck(:pulp_id), "RHEA-2012:0056"
+      refute_includes @repo_clone.errata.pluck(:pulp_prn), "RHEA-2012:0056"
     end
 
     def test_yum_copy_with_errata_inclusion_filter
@@ -176,7 +176,7 @@ module ::Actions::Pulp3
       @repo_clone.reload
 
       assert_equal ['crow', 'duck', 'stork'].sort, @repo_clone.rpms.pluck(:name).sort
-      assert_equal ["RHEA-2012:0056"], @repo_clone.errata.pluck(:pulp_id)
+      assert_equal ["RHEA-2012:0056"], @repo_clone.errata.pluck(:pulp_prn)
     end
 
     # rubocop:disable Metrics/AbcSize
@@ -199,13 +199,13 @@ module ::Actions::Pulp3
       create_repo(repo2, @primary)
       create_repo(repo3, @primary)
 
-      ::Katello::Pulp3::Repository::Yum.any_instance.stubs(:generate_backend_object_name).returns(@repo.pulp_id)
+      ::Katello::Pulp3::Repository::Yum.any_instance.stubs(:generate_backend_object_name).returns(@repo.pulp_prn)
       sync_args = {:smart_proxy_id => @primary.id, :repo_id => @repo.id}
       ForemanTasks.sync_task(::Actions::Pulp3::Orchestration::Repository::Sync, @repo, @primary, sync_args)
-      ::Katello::Pulp3::Repository::Yum.any_instance.stubs(:generate_backend_object_name).returns(repo2.pulp_id)
+      ::Katello::Pulp3::Repository::Yum.any_instance.stubs(:generate_backend_object_name).returns(repo2.pulp_prn)
       sync_args = {:smart_proxy_id => @primary.id, :repo_id => repo2.id}
       ForemanTasks.sync_task(::Actions::Pulp3::Orchestration::Repository::Sync, repo2, @primary, sync_args)
-      ::Katello::Pulp3::Repository::Yum.any_instance.stubs(:generate_backend_object_name).returns(repo3.pulp_id)
+      ::Katello::Pulp3::Repository::Yum.any_instance.stubs(:generate_backend_object_name).returns(repo3.pulp_prn)
       sync_args = {:smart_proxy_id => @primary.id, :repo_id => repo3.id}
       ForemanTasks.sync_task(::Actions::Pulp3::Orchestration::Repository::Sync, repo3, @primary, sync_args)
 
@@ -234,7 +234,7 @@ module ::Actions::Pulp3
       @repo_clone.reload
 
       assert_equal ['armadillo'], @repo_clone.rpms.pluck(:name)
-      assert_equal ["KATELLO-RHEA-2010:0001", "KATELLO-RHEA-2010:99143", "KATELLO-RHSA-2010:0858", "RHEA-2021:9999"].sort, @repo_clone.errata.pluck(:pulp_id).sort
+      assert_equal ["KATELLO-RHEA-2010:0001", "KATELLO-RHEA-2010:99143", "KATELLO-RHSA-2010:0858", "RHEA-2021:9999"].sort, @repo_clone.errata.pluck(:pulp_prn).sort
     ensure
       ensure_creatable(@repo, @primary)
       ensure_creatable(@repo_clone, @primary)
@@ -649,7 +649,7 @@ module ::Actions::Pulp3
 
       refute_empty @repo.module_streams
       assert_equal @repo_clone.module_streams.size, 5
-      refute_includes @repo_clone.module_streams.pluck(:pulp_id), duck.pulp_id
+      refute_includes @repo_clone.module_streams.pluck(:pulp_prn), duck.pulp_prn
     end
   end
 
@@ -698,7 +698,7 @@ module ::Actions::Pulp3
     def test_package_groups_as_a_filter_rule
       filter = FactoryBot.create(:katello_content_view_package_group_filter, :inclusion => true)
       birds = @repo.package_groups.where(:name => "bird").first
-      FactoryBot.create(:katello_content_view_package_group_filter_rule, :filter => filter, :uuid => birds.pulp_id)
+      FactoryBot.create(:katello_content_view_package_group_filter_rule, :filter => filter, :uuid => birds.pulp_prn)
 
       module_stream_filter = FactoryBot.create(:katello_content_view_module_stream_filter, :inclusion => true)
 

@@ -14,7 +14,7 @@ module Katello
       @repo.reload
     end
 
-    def test_content_unit_pulp_ids_returns_pulp_hrefs
+    def test_content_unit_pulp_prns_returns_pulp_hrefs
       @primary = SmartProxy.pulp_primary
       @repo = katello_repositories(:fedora_17_x86_64)
       @repo.root.update!(:url => 'https://fixtures.pulpproject.org/rpm-unsigned/')
@@ -34,11 +34,11 @@ module Katello
 
       birds = @repo.package_groups.where(:name => "birds").first
 
-      first_rule = FactoryBot.create(:katello_content_view_package_group_filter_rule, :uuid => birds.pulp_id)
+      first_rule = FactoryBot.create(:katello_content_view_package_group_filter_rule, :uuid => birds.pulp_prn)
 
-      bird_pulp_ids = @repo.rpms.where(:name => ["cockateel", "duck", "penguin", "stork"]).pluck(:pulp_id)
+      bird_pulp_prns = @repo.rpms.where(:name => ["cockateel", "duck", "penguin", "stork"]).pluck(:pulp_prn)
 
-      assert_equal bird_pulp_ids, first_rule.filter.content_unit_pulp_ids(@repo)
+      assert_equal bird_pulp_prns, first_rule.filter.content_unit_pulp_prns(@repo)
     end
   end
 end

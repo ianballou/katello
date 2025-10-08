@@ -14,15 +14,15 @@ module Katello
       ]
     end
 
-    def test_filter_by_pulp_id_returns_every_metadata_pulp_href_with_empty_list_of_pulp_ids
+    def test_filter_by_pulp_prn_returns_every_metadata_pulp_href_with_empty_list_of_pulp_prns
       assert_equal [@metadata1_href, @metadata2_href], filter_metadatafiles_by_pulp_hrefs(@metadatafiles_results, [])
     end
 
-    def test_filter_by_pulp_id_returns_nothing_with_empty_list_of_metadatafiles
+    def test_filter_by_pulp_prn_returns_nothing_with_empty_list_of_metadatafiles
       assert_empty filter_metadatafiles_by_pulp_hrefs([], ["/some/content/href"])
     end
 
-    def test_filter_by_pulp_id_returns_every_metadata_pulp_href_with_any_package_pulp_id
+    def test_filter_by_pulp_prn_returns_every_metadata_pulp_href_with_any_package_pulp_prn
       assert_equal [@metadata1_href, @metadata2_href], filter_metadatafiles_by_pulp_hrefs(@metadatafiles_results, ["/some/content/href"])
     end
   end
@@ -40,15 +40,15 @@ module Katello
       ]
     end
 
-    def test_filter_by_pulp_id_returns_every_distribution_tree_pulp_href_with_empty_list_of_pulp_ids
+    def test_filter_by_pulp_prn_returns_every_distribution_tree_pulp_href_with_empty_list_of_pulp_prns
       assert_equal [@distribution_tree1_href, @distribution_tree2_href], filter_distribution_trees_by_pulp_hrefs(@distribution_trees_results, [])
     end
 
-    def test_filter_by_pulp_id_returns_nothing_with_empty_list_of_distribution_trees
+    def test_filter_by_pulp_prn_returns_nothing_with_empty_list_of_distribution_trees
       assert_empty filter_distribution_trees_by_pulp_hrefs([], ["/some/content/href"])
     end
 
-    def test_filter_by_pulp_id_returns_every_distribution_tree_pulp_href_with_any_package_pulp_id
+    def test_filter_by_pulp_prn_returns_every_distribution_tree_pulp_href_with_any_package_pulp_prn
       assert_equal [@distribution_tree1_href, @distribution_tree2_href], filter_distribution_trees_by_pulp_hrefs(@distribution_trees_results, ["/some/content/href"])
     end
   end
@@ -66,23 +66,23 @@ module Katello
       @package_group.stubs(:package_names).returns([@rpm2.name, @rpm3.name])
     end
 
-    def test_filter_by_pulp_id_returns_no_package_groups_with_empty_package_href_list
+    def test_filter_by_pulp_prn_returns_no_package_groups_with_empty_package_href_list
       assert_empty filter_package_groups_by_pulp_href([@package_group], [])
     end
 
-    def test_filter_by_pulp_id_returns_nothing_with_empty_list_of_package_groups
-      assert_empty filter_package_groups_by_pulp_href([], [@rpm2.pulp_id])
+    def test_filter_by_pulp_prn_returns_nothing_with_empty_list_of_package_groups
+      assert_empty filter_package_groups_by_pulp_href([], [@rpm2.pulp_prn])
     end
 
-    def test_filter_by_pulp_id_includes_incomplete_package_groups
-      assert_equal [@package_group], filter_package_groups_by_pulp_href([@package_group], [@rpm2.pulp_id])
+    def test_filter_by_pulp_prn_includes_incomplete_package_groups
+      assert_equal [@package_group], filter_package_groups_by_pulp_href([@package_group], [@rpm2.pulp_prn])
     end
 
-    def test_filter_by_pulp_id_returns_nothing_if_no_package_group_matches
+    def test_filter_by_pulp_prn_returns_nothing_if_no_package_group_matches
       assert_empty filter_package_groups_by_pulp_href([@package_group], [@packagegroup3_href])
     end
 
-    def test_filter_by_pulp_id_ignores_empty_package_group_names
+    def test_filter_by_pulp_prn_ignores_empty_package_group_names
       @package_group.stubs(:package_names).returns([])
       assert_empty filter_package_groups_by_pulp_href([@package_group], [@packagegroup3_href])
     end

@@ -22,9 +22,9 @@ module Actions
                 ::Katello::Erratum.in_repositories(new_repos)).pluck(:errata_id)
               ::Katello::ContentViewErratumFilterRule.in_content_views([content_view.id]).where(errata_id: lost_errata_ids).delete_all
 
-              lost_package_group_hrefs = (::Katello::PackageGroup.in_repositories(old_repos) -
-                ::Katello::PackageGroup.in_repositories(new_repos)).pluck(:pulp_id)
-              ::Katello::ContentViewPackageGroupFilterRule.in_content_views([content_view.id]).where(uuid: lost_package_group_hrefs).delete_all
+              lost_package_group_prns = (::Katello::PackageGroup.in_repositories(old_repos) -
+                ::Katello::PackageGroup.in_repositories(new_repos)).pluck(:pulp_prn)
+              ::Katello::ContentViewPackageGroupFilterRule.in_content_views([content_view.id]).where(uuid: lost_package_group_prns).delete_all
             end
           end
 

@@ -100,7 +100,7 @@ FactoryBot.define do
 
   factory :registry_repository, class: Katello::Repository do
     association :root, :factory => :katello_root_repository, :strategy => :build
-    sequence(:pulp_id) { |n| "pulp-#{n}" }
+    sequence(:pulp_prn) { |n| "pulp-#{n}" }
 
     transient do
       product { nil }

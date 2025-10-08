@@ -32,11 +32,12 @@ module Katello
           PulpRpmClient::RemotesUlnApi.new(api_client)
         end
 
-        def get_remotes_api(href: nil, url: nil)
-          fail 'Provide exactly one of href or url for yum remote selection!' if url.blank? && href.blank?
-          fail 'The href must be a pulp_rpm remote href!' if href && !href.start_with?('/pulp/api/v3/remotes/rpm/')
+        def get_remotes_api(prn: nil, url: nil)
+          fail 'Provide exactly one of prn or url for yum remote selection!' if url.blank? && prn.blank?
+          fail 'The prn must be a pulp_rpm remote prn!' if prn && !prn.start_with?('prn:rpm.')
 
-          if href&.start_with?('/pulp/api/v3/remotes/rpm/uln/') || url&.start_with?('uln')
+          # PRN format: prn:rpm.ulnremote:<uuid> for ULN remotes, prn:rpm.rpmremote:<uuid> for regular RPM remotes
+          if prn&.start_with?('prn:rpm.ulnremote:') || url&.start_with?('uln')
             remotes_uln_api
           else
             remotes_api

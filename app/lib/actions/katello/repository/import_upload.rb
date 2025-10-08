@@ -31,7 +31,7 @@ module Actions
               upload_ids.zip(unit_keys).collect do |upload_id, unit_key|
                 unit_metadata = unit_key if unit_type_id == 'docker_tag'
                 import_upload_args = {
-                  pulp_id: repository.pulp_id,
+                  repository_prn: repository.repository_prn,
                   unit_type_id: unit_type_id,
                   unit_key: unit_key.with_indifferent_access,
                   upload_id: upload_id,
@@ -83,12 +83,12 @@ module Actions
             result[:pulp_tasks]&.each do |task|
               details = task ? task.dig(:result, :details, :unit) : nil
               if details && details.dig('type_id') == 'docker_manifest'
-                manifest = ::Katello::DockerManifest.find_by(:pulp_id => details.dig(:metadata, :id))
+                manifest = ::Katello::DockerManifest.find_by(:pulp_prn => details.dig(:metadata, :prn))
                 json_result = JSON.parse(::Rabl.render(manifest, '/katello/api/v2/docker_manifests/show'))
                 json_result[:type] = 'docker_manifest'
                 json_results << json_result
               elsif details && details.dig('type_id') == 'docker_tag'
-                manifest = ::Katello::DockerTag.find_by(:pulp_id => details.dig(:metadata, :id))
+                manifest = ::Katello::DockerTag.find_by(:pulp_prn => details.dig(:metadata, :prn))
                 json_result = JSON.parse(::Rabl.render(manifest, '/katello/api/v2/docker_tags/show'))
                 json_result[:type] = 'docker_tag'
                 json_results << json_result
@@ -96,7 +96,7 @@ module Actions
                 json_results << {:type => 'file'}
               end
             end
-            if !json_results.size && (result[:content_unit_href])
+            if !json_results.size && (result[:content_unit_prn])
               json_results << {:type => 'file'}
             end
           end

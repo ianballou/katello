@@ -1,20 +1,20 @@
 debian_pulp_ragnarok:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_pulp_ragnarok_root) %>
-  pulp_id:              debian_pulp_ragnarok
+  pulp_prn:             debian_pulp_ragnarok
   relative_path:        'ACME_Corporation/library/debian_pulp_ragnarok_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 debian_9_amd64:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_9_amd64_root) %>
-  pulp_id:              debian_9
+  pulp_prn:             debian_9
   relative_path:        'ACME_Corporation/library/debian_9_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 debian_10_amd64:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_10_amd64_root) %>
-  pulp_id:              Debian_10
+  pulp_prn:             Debian_10
   content_id:           110
   relative_path:        'ACME_Corporation/library/debian_10_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
@@ -25,7 +25,7 @@ debian_10_amd64:
 
 debian_10_amd64_duplicate:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_10_amd64_duplicate_root) %>
-  pulp_id:              Debian_10_duplicate
+  pulp_prn:             Debian_10_duplicate
   relative_path:        'ACME_Corporation/library/debian_10_duplicate_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -36,7 +36,7 @@ debian_10_amd64_duplicate:
 debian_10_dev_library_view:
   library_instance:     debian_10_amd64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_10_amd64_root) %>
-  pulp_id:              debian_10_dev_library_view
+  pulp_prn:             debian_10_dev_library_view
   content_id:           112
   relative_path:        'ACME_Corporation/dev/debian_10_library_library_view_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
@@ -45,7 +45,7 @@ debian_10_dev_library_view:
 debian_10_dev_view:
   library_instance:     debian_10_amd64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_10_amd64_root) %>
-  pulp_id:              debian_10_dev_view
+  pulp_prn:             debian_10_dev_view
   content_id:           112
   relative_path:        'ACME_Corporation/dev/debian_cv_dev'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
@@ -54,7 +54,7 @@ debian_10_dev_view:
 debian_10_test_view:
   library_instance:     debian_10_amd64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_10_amd64_root) %>
-  pulp_id:              debian_10_test_view
+  pulp_prn:             debian_10_test_view
   content_id:           113
   relative_path:        'ACME_Corporation/test/debian_cv_test'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:test) %>
@@ -63,7 +63,7 @@ debian_10_test_view:
 debian_10_amd64_dev:
   library_instance:     debian_10_amd64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_10_amd64_root) %>
-  pulp_id:              12
+  pulp_prn:              12
   content_id:           111
   relative_path:        'ACME_Corporation/dev/debian_10_dev_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
@@ -75,7 +75,7 @@ debian_10_amd64_dev:
 
 fedora_17_x86_64:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              Fedora_17
+  pulp_prn:              Fedora_17
   relative_path:        'ACME_Corporation/library/fedora_17_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -87,7 +87,7 @@ fedora_17_x86_64:
 
 fedora_17_x86_64_acme_dev:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              fedora_17_acme_dev
+  pulp_prn:              fedora_17_acme_dev
   relative_path:        'ACME_Corporation/dev/fedora_17_dev_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -100,7 +100,7 @@ fedora_17_x86_64_acme_dev:
 fedora_17_x86_64_dev:
   library_instance:     fedora_17_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              2
+  pulp_prn:              2
   relative_path:        'ACME_Corporation/dev/fedora_17_dev_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_dev_view_version) %>
@@ -113,7 +113,7 @@ fedora_17_x86_64_dev:
 fedora_17_x86_64_dev_archive:
   library_instance:     fedora_17_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              2_archive
+  pulp_prn:              2_archive
   relative_path:        'ACME_Corporation/dev/fedora_17_dev_label'
   environment_id:
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_dev_view_version) %>
@@ -125,7 +125,7 @@ fedora_17_x86_64_dev_archive:
 
 fedora_17_x86_64_duplicate:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_duplicate_root) %>
-  pulp_id:              2_duplicate
+  pulp_prn:              2_duplicate
   relative_path:        'ACME_Corporation/dev/fedora_17_duplicate_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -138,7 +138,7 @@ fedora_17_x86_64_duplicate:
 fedora_17_library_library_view:
   library_instance:     fedora_17_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              fedora_17_library_library_view
+  pulp_prn:              fedora_17_library_library_view
   relative_path:        'ACME_Corporation/dev/fedora_17_library_library_view_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_1) %>
@@ -151,21 +151,21 @@ fedora_17_library_library_view:
 fedora_17_dev_library_view:
   library_instance:     fedora_17_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              fedora_17_dev_library_view
+  pulp_prn:              fedora_17_dev_library_view
   relative_path:        'ACME_Corporation/dev/fedora_17_library_library_view_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_2) %>
 
 feedless_fedora_17_x86_64:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:feedless_fedora_17_x86_64_root) %>
-  pulp_id:              feedless_1
+  pulp_prn:              feedless_1
   relative_path:        'ACME_Corporation/library/fedora_17_label_no_feed'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 rhel_7_x86_64:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_7_x86_64_root) %>
-  pulp_id:              9
+  pulp_prn:              9
   relative_path:        'ACME_Corporation/library/rhel_7_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -177,7 +177,7 @@ rhel_7_x86_64:
 
 rhel_6_x86_64:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_6_x86_64_root) %>
-  pulp_id:              pulp-uuid-rhel_6_x86_64
+  pulp_prn:              pulp-uuid-rhel_6_x86_64
   relative_path:        'ACME_Corporation/library/rhel_6_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -190,7 +190,7 @@ rhel_6_x86_64:
 rhel_6_x86_64_dev:
   library_instance:     rhel_6_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_6_x86_64_root) %>
-  pulp_id:              8
+  pulp_prn:              8
   relative_path:        'ACME_Corporation/dev/rhel_6_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_2) %>
@@ -198,13 +198,13 @@ rhel_6_x86_64_dev:
 rhel_6_x86_64_dev_archive:
   library_instance:     rhel_6_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_6_x86_64_root) %>
-  pulp_id:              8_arch
+  pulp_prn:              8_arch
   relative_path:        'ACME_Corporation/archive/rhel_6_label'
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_2) %>
 
 fedora_17_no_arch:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_no_arch_root) %>
-  pulp_id:              1
+  pulp_prn:              1
   relative_path:        'ACME_Corporation/library/fedora_17_label_no_arch'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -215,7 +215,7 @@ fedora_17_no_arch:
 
 rhel_7_no_arch:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_7_no_arch_root) %>
-  pulp_id:              9_noarch
+  pulp_prn:              9_noarch
   relative_path:        'ACME_Corporation/library/rhel_7_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -227,7 +227,7 @@ rhel_7_no_arch:
 rhel_6_x86_64_library_view_1:
   library_instance:     rhel_6_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_6_x86_64_root) %>
-  pulp_id:              8_view1
+  pulp_prn:              8_view1
   relative_path:        'ACME_Corporation/library_view/rhel_6_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_1) %>
@@ -235,14 +235,14 @@ rhel_6_x86_64_library_view_1:
 rhel_6_x86_64_library_view_1_archive:
   library_instance:     rhel_6_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_6_x86_64_root) %>
-  pulp_id:              8_view1_archive
+  pulp_prn:              8_view1_archive
   relative_path:        'ACME_Corporation/library_view/archive/rhel_6_label'
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_1) %>
 
 fedora_17_x86_64_library_view_1:
   library_instance:     fedora_17_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              3_view1
+  pulp_prn:              3_view1
   relative_path:        'ACME_Corporation/library/LibraryView/fedora_17_label'
   environment_id:
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_1) %>
@@ -250,7 +250,7 @@ fedora_17_x86_64_library_view_1:
 fedora_17_x86_64_library_view_2:
   library_instance:     fedora_17_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              3_view2
+  pulp_prn:              3_view2
   relative_path:        'ACME_Corporation/library/LibraryView/fedora_17_label'
   environment_id:
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_2) %>
@@ -258,42 +258,42 @@ fedora_17_x86_64_library_view_2:
 fedora_17_x86_64_library_view_2_library:
   library_instance:     fedora_17_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_x86_64_root) %>
-  pulp_id:              3_view2_library
+  pulp_prn:              3_view2_library
   relative_path:        'ACME_Corporation/library/LibraryView/fedora_17_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_2) %>
 
 fedora_17_unpublished:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_unpublished_root) %>
-  pulp_id:              6
+  pulp_prn:              6
   relative_path:        'ACME_Corporation/library/fedora_17_unpublished_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 fedora_17_unpublished_2:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:fedora_17_unpublished_2_root) %>
-  pulp_id:              7
+  pulp_prn:              7
   relative_path:        'ACME_Corporation/library/fedora_17_unpublished_2_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 srpm_repo:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:srpm_repo_root) %>
-  pulp_id:              source_rpm
+  pulp_prn:              source_rpm
   relative_path:        'ACME_Corporation/library/LibraryView/source_rpm'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 redis:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:redis_root) %>
-  pulp_id:              "Default_Organization-Test-redis"
+  pulp_prn:              "Default_Organization-Test-redis"
   relative_path:        'ACME_Corporation/library/redis'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 busybox:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:busybox_root) %>
-  pulp_id:              "Default_Organization-Test-busybox-library"
+  pulp_prn:              "Default_Organization-Test-busybox-library"
   relative_path:        'ACME_Corporation/library/busybox'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -302,14 +302,14 @@ busybox:
 busybox_dev:
   library_instance:     busybox
   root_id:              <%= ActiveRecord::FixtureSet.identify(:busybox_root) %>
-  pulp_id:              "Default_Organization-Test-busybox-dev"
+  pulp_prn:              "Default_Organization-Test-busybox-dev"
   relative_path:        'ACME_Corporation/dev/busybox'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_dev_view_version) %>
 
 busybox2:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:busybox2_root) %>
-  pulp_id:              "Default_Organization-Test-busybox2-dev"
+  pulp_prn:              "Default_Organization-Test-busybox2-dev"
   relative_path:        'ACME_Corporation/library/busybox'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -318,7 +318,7 @@ busybox2:
 busybox_view1:
   library_instance:     busybox
   root_id:              <%= ActiveRecord::FixtureSet.identify(:busybox_root) %>
-  pulp_id:              "Default_Organization-Test-busybox"
+  pulp_prn:              "Default_Organization-Test-busybox"
   relative_path:        'ACME_Corporation/library/busybox'
   environment_id:
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_1) %>
@@ -326,7 +326,7 @@ busybox_view1:
 busybox_view2:
   library_instance:     busybox
   root_id:              <%= ActiveRecord::FixtureSet.identify(:busybox_root) %>
-  pulp_id:              "Default_Organization-Test-busybox"
+  pulp_prn:              "Default_Organization-Test-busybox"
   relative_path:        'ACME_Corporation/library/busybox'
   environment_id:
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_view_version_2) %>
@@ -334,7 +334,7 @@ busybox_view2:
 debian_10_amd64_composite_view_version_1:
   library_instance:     debian_10_amd64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:debian_10_amd64_root) %>
-  pulp_id:              8_deb_composite_version1
+  pulp_prn:              8_deb_composite_version1
   content_id:           113
   relative_path:        'ACME_Corporation/library/composite/debian_10_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
@@ -343,7 +343,7 @@ debian_10_amd64_composite_view_version_1:
 rhel_6_x86_64_composite_view_version_1:
   library_instance:     rhel_6_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_6_x86_64_root) %>
-  pulp_id:              8_composite_version1
+  pulp_prn:              8_composite_version1
   relative_path:        'ACME_Corporation/library/composite/rhel_6_label'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:composite_view_version_1) %>
@@ -352,13 +352,13 @@ rhel_6_x86_64_composite_view_version_1:
 rhel_6_x86_64_composite_view_version_1_archive:
   library_instance:     rhel_6_x86_64
   root_id:              <%= ActiveRecord::FixtureSet.identify(:rhel_6_x86_64_root) %>
-  pulp_id:              8_composite_version1_archive
+  pulp_prn:              8_composite_version1_archive
   relative_path:        'ACME_Corporation/composite/archive/rhel_6_label'
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:composite_view_version_1) %>
 
 generic_file:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:generic_file_root) %>
-  pulp_id:              "Default_Organization-Cabinet-My_Files"
+  pulp_prn:              "Default_Organization-Cabinet-My_Files"
   relative_path:        'Default_Organization/library/My_Files'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
@@ -366,84 +366,84 @@ generic_file:
 generic_file_archive:
   library_instance:     generic_file
   root_id:              <%= ActiveRecord::FixtureSet.identify(:generic_file_root) %>
-  pulp_id:              "Default_Organization-1_0-Cabinet-My_Files"
+  pulp_prn:              "Default_Organization-1_0-Cabinet-My_Files"
   relative_path:        'Default_Organization/1.0/library/My_Files'
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_dev_view_version) %>
 
 generic_file_dev:
   library_instance:     generic_file
   root_id:              <%= ActiveRecord::FixtureSet.identify(:generic_file_root) %>
-  pulp_id:              "Default_Organization-Cabinet-My_Files_Dev"
+  pulp_prn:              "Default_Organization-Cabinet-My_Files_Dev"
   relative_path:        'Default_Organization/dev/My_Files'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:dev) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_dev_view_version) %>
 
 pulp3_file_1:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:pulp3_file_root_1) %>
-  pulp_id:              "Default_Organization-Cabinet-pulp3_File_1"
+  pulp_prn:              "Default_Organization-Cabinet-pulp3_File_1"
   relative_path:        'Default_Organization/library/pulp3_File_1'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 pulp3_ansible_collection_1:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:pulp3_ansible_collection_root_1) %>
-  pulp_id:              "Default_Organization-Cabinet-pulp3_Ansible_collection_1"
+  pulp_prn:              "Default_Organization-Cabinet-pulp3_Ansible_collection_1"
   relative_path:        'Default_Organization/library/pulp3_Ansible_collection_1'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 pulp3_docker_1:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:pulp3_docker_root_1) %>
-  pulp_id:              "Default_Organization-Cabinet-pulp3_Docker_1"
+  pulp_prn:              "Default_Organization-Cabinet-pulp3_Docker_1"
   relative_path:        '/Default_Organization/library/pulp3_Docker_1'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 pulp3_deb_1:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:pulp3_deb_root_1) %>
-  pulp_id:              "Default_Organization-Cabinet-pulp3_Deb_1"
+  pulp_prn:              "Default_Organization-Cabinet-pulp3_Deb_1"
   relative_path:        'Default_Organization/library/pulp3_Deb_1'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 pulp3_python_1:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:pulp3_python_root_1) %>
-  pulp_id:              "Default_Organization-Cabinet-pulp3_Python_1"
+  pulp_prn:              "Default_Organization-Cabinet-pulp3_Python_1"
   relative_path:        'Default_Organization/library/pulp3_Python_1'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 uln_ovm2_2_1_1_i386_patch:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:uln_ovm2_2_1_1_i386_patch_root) %>
-  pulp_id:              "Default_Organization-Cabinet-uln_Ovm2_2_1_1_i386_Patch"
+  pulp_prn:              "Default_Organization-Cabinet-uln_Ovm2_2_1_1_i386_Patch"
   relative_path:        'Default_Organization/library/uln_ovm2_2_1_1_i386_patch'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 pulp3_ostree_1:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:pulp3_ostree_root_1) %>
-  pulp_id:              "Default_Organization-Cabinet-pulp3_OSTree_1"
+  pulp_prn:              "Default_Organization-Cabinet-pulp3_OSTree_1"
   relative_path:        'Default_Organization/library/pulp3_OSTree_1'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 product_host_count_repo1:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:product_host_count_repo1_root) %>
-  pulp_id:              "default_organization-my-product-host-count-repo1"
+  pulp_prn:              "default_organization-my-product-host-count-repo1"
   relative_path:        'default_organization/library/my-product-host-count-repo1'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 product_host_count_repo2:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:product_host_count_repo2_root) %>
-  pulp_id:              "default_organization-my-product-host-count-repo2"
+  pulp_prn:              "default_organization-my-product-host-count-repo2"
   relative_path:        'default_organization/library/my-product-host-count-repo2'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>
 
 container_push:
   root_id:              <%= ActiveRecord::FixtureSet.identify(:container_push_root) %>
-  pulp_id:              "09b10114-74d7-4d0b-b7f2-e2b7eebd2bfe"
+  pulp_prn:              "09b10114-74d7-4d0b-b7f2-e2b7eebd2bfe"
   relative_path:        'id/1/2/container-push-repo'
   environment_id:       <%= ActiveRecord::FixtureSet.identify(:library) %>
   content_view_version_id: <%= ActiveRecord::FixtureSet.identify(:library_default_version) %>

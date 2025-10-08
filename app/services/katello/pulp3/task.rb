@@ -3,7 +3,7 @@ module Katello
     class Task
       # A call report Looks like:  {"task":"/pulp/api/v3/tasks/5/"}
       # {
-      #    "pulp_href":"/pulp/api/v3/tasks/4/",
+      #    "prn":"/pulp/api/v3/tasks/4/",
       #    "pulp_created":"2019-02-21T19:50:40.476767Z",
       #    "job_id":"d0359658-d926-47a2-b430-1b2092b3bd86",
       #    "state":"completed",
@@ -44,34 +44,34 @@ module Katello
 
       def initialize(smart_proxy, data)
         @smart_proxy = smart_proxy
-        if (href = data['task'])
-          @href = href
+        if (prn = data['task'])
+          @prn = prn
         else
           @pulp_data = data.with_indifferent_access
-          @href = @pulp_data['pulp_href']
-          Rails.logger.error("Got empty pulp_href on #{@pulp_data}") if @href.nil?
+          @prn = @pulp_data['prn']
+          Rails.logger.error("Got empty prn on #{@pulp_data}") if @prn.nil?
         end
       end
 
-      def self.version_href(tasks)
+      def self.version_prn(tasks)
         tasks = [tasks] unless tasks.is_a?(Array)
-        version_hrefs = tasks.map { |task| task[:created_resources] }.flatten
-        version_hrefs = version_hrefs.select { |href| ::Katello::Pulp3::Repository.version_href?(href) }
-        Rails.logger.debug("Got multiple version_hrefs for pulp task: #{tasks}") if version_hrefs.length > 2
-        version_hrefs.last
+        version_prns = tasks.map { |task| task[:created_resources] }.flatten
+        version_prns = version_prns.select { |prn| ::Katello::Pulp3::Repository.version_prn?(prn) }
+        Rails.logger.debug("Got multiple version_prns for pulp task: #{tasks}") if version_prns.length > 2
+        version_prns.last
       end
 
-      def self.publication_href(tasks)
+      def self.publication_prn(tasks)
         tasks = [tasks] unless tasks.is_a?(Array)
-        publication_hrefs = tasks.map { |task| task[:created_resources] }.flatten
-        publication_hrefs = publication_hrefs.select { |href| ::Katello::Pulp3::Repository.publication_href?(href) }
-        Rails.logger.debug("Got multiple publication hrefs for pulp task: #{tasks}") if publication_hrefs.length > 2
-        publication_hrefs.last #return the last href to workaround https://pulp.plan.io/issues/9098
+        publication_prns = tasks.map { |task| task[:created_resources] }.flatten
+        publication_prns = publication_prns.select { |prn| ::Katello::Pulp3::Repository.publication_prn?(prn) }
+        Rails.logger.debug("Got multiple publication prns for pulp task: #{tasks}") if publication_prns.length > 2
+        publication_prns.last #return the last prn to workaround https://pulp.plan.io/issues/9098
       end
 
       def task_data(force_refresh = false)
         @pulp_data = nil if force_refresh
-        @pulp_data ||= tasks_api.read(@href).as_json.with_indifferent_access
+        @pulp_data ||= tasks_api.read(@prn).as_json.with_indifferent_access
       end
 
       delegate :tasks_api, to: :core_api
@@ -80,8 +80,8 @@ module Katello
         ::Katello::Pulp3::Api::Core.new(@smart_proxy)
       end
 
-      def task_group_href
-        task_data[:task_group] || task_data[:created_resources].find { |href| href.starts_with?("/pulp/api/v3/task-groups/") }
+      def task_group_prn
+        task_data[:task_group] || task_data[:created_resources].find { |prn| prn.starts_with?("prn:pulp:task-group:") }
       end
 
       def done?
@@ -119,10 +119,10 @@ module Katello
       end
 
       def cancel
-        core_api.cancel_task(task_data['pulp_href'])
+        core_api.cancel_task(task_data['prn'])
         #the main task may have completed, so cancel spawned tasks too
         task_data['spawned_tasks']&.each do |spawned|
-          core_api.cancel_task(spawned['pulp_href'])
+          core_api.cancel_task(spawned['prn'])
         end
       end
     end

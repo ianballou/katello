@@ -19,7 +19,7 @@ module Actions
         def run # rubocop:disable Metrics/AbcSize
           smart_proxy = ::SmartProxy.unscoped.find(input[:smart_proxy_id])
           api = ::Katello::Pulp3::Api::Core.new(smart_proxy)
-          export_data = api.export_api.list(input[:exporter_data][:pulp_href]).results.first
+          export_data = api.export_api.list(input[:exporter_data][:exporter_prn]).results.first
           output[:exported_file_checksum] = export_data.output_file_info
           if output[:exported_file_checksum].blank?
             output[:export_history_id] = nil

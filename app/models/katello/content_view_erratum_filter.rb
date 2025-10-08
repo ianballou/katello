@@ -67,24 +67,24 @@ module Katello
 
     def errata_module_stream_pulp_ids_from_clauses(repo, clauses, additional_included_errata)
       module_streams = Erratum.list_modular_streams_by_clauses(repo, clauses, additional_included_errata)
-      module_streams.pluck(:pulp_id)
+      module_streams.pluck(:pulp_prn)
     end
 
     def errata_package_pulp_ids_from_package_filenames(repo, package_filenames)
-      rpms_by_filename(repo, package_filenames).pluck(:pulp_id)
+      rpms_by_filename(repo, package_filenames).pluck(:pulp_prn)
     end
 
     def errata_module_stream_pulp_ids_from_errata_ids(repo, errata_ids, additional_included_errata)
       module_streams = Katello::Erratum.where(:errata_id => errata_ids).map(&:module_streams).compact.flatten -
         Katello::Erratum.where(:errata_id => additional_included_errata.pluck(:errata_id)).map(&:module_streams).compact.flatten
       ModuleStream.joins(:repository_module_streams).
-        where(:id => module_streams.pluck(:id), "#{RepositoryModuleStream.table_name}.repository_id" => repo.id).pluck(:pulp_id)
+        where(:id => module_streams.pluck(:id), "#{RepositoryModuleStream.table_name}.repository_id" => repo.id).pluck(:pulp_prn)
     end
 
     def errata_package_pulp_ids_from_errata_ids(repo, errata_ids, additional_included_errata)
       package_filenames = Katello::ErratumPackage.joins(:erratum).where("#{Erratum.table_name}.errata_id" => errata_ids).pluck(:filename) -
         Katello::ErratumPackage.joins(:erratum).where("#{Erratum.table_name}.errata_id" => additional_included_errata.pluck(:errata_id)).pluck(:filename)
-      rpms_by_filename(repo, package_filenames).pluck(:pulp_id)
+      rpms_by_filename(repo, package_filenames).pluck(:pulp_prn)
     end
 
     def erratum_arel

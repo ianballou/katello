@@ -24,13 +24,13 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::Apt.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
       def self.generate_model_row(unit)
         unit = unit.try(:with_indifferent_access)
         return {
-          pulp_id: unit[unit_identifier],
+          pulp_prn: unit[unit_identifier],
           checksum: unit[:sha256],
           filename: unit[:relative_path],
           name: unit[:package],

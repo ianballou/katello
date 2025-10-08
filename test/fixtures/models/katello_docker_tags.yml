@@ -1,9 +1,9 @@
 one:
   name: one
-  pulp_id: one
+  pulp_prn: one
 two:
   name: two
-  pulp_id: two
+  pulp_prn: two
 three:
   name: three
-  pulp_id: three
+  pulp_prn: three

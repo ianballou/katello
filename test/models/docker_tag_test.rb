@@ -13,7 +13,7 @@ module Katello
 
       @repo.clones.each do |repo|
         tag = @tag.dup
-        tag.pulp_id = SecureRandom.hex
+        tag.pulp_prn = SecureRandom.hex
         repo.docker_tags << tag
       end
     end
@@ -24,8 +24,8 @@ module Katello
     end
 
     def test_with_uuid
-      @tag.update(:pulp_id => 'ksdjfkdjkfjdk')
-      tag = DockerTag.with_pulp_id(@tag.pulp_id).first
+      @tag.update(:pulp_prn => 'ksdjfkdjkfjdk')
+      tag = DockerTag.with_pulp_prn(@tag.pulp_prn).first
       refute_nil tag
     end
 

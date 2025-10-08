@@ -72,7 +72,7 @@ module Actions
                   ::Actions::Pulp3::ContentViewVersion::CreateExportHistory,
                   smart_proxy_id: smart_proxy.id,
                   exporter_data: action_output[:exporter_data],
-                  pulp_href: action_output[:exporter_data][:pulp_href],
+                  exporter_prn: action_output[:exporter_data][:exporter_prn],
                   content_view_version_id: content_view_version.id,
                   from_content_view_version_id: from_content_view_version&.id,
                   destination_server: options[:destination_server],

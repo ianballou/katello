@@ -32,7 +32,7 @@ module Katello
 
     EXPORTABLE_TYPES = [YUM_TYPE, FILE_TYPE, ANSIBLE_COLLECTION_TYPE, DOCKER_TYPE, DEB_TYPE].freeze
 
-    ALLOWED_UPDATE_FIELDS = ['version_href', 'last_indexed'].freeze
+    ALLOWED_UPDATE_FIELDS = ['version_prn', 'last_indexed'].freeze
 
     define_model_callbacks :sync, :only => :after
 
@@ -324,8 +324,8 @@ module Katello
     end
 
     def soft_copy_of_library?
-      return false if self.version_href.nil?
-      self.version_href.starts_with?(self.library_instance.backend_service(SmartProxy.pulp_primary).repository_reference.repository_href)
+      return false if self.version_prn.nil?
+      self.version_prn.starts_with?(self.library_instance.backend_service(SmartProxy.pulp_primary).repository_reference.repository_prn)
     end
 
     def archive?
@@ -775,7 +775,7 @@ module Katello
       if is_integer
         removable_unit_association.where("#{table_name}.id in (?)", ids)
       else
-        removable_unit_association.where("#{table_name}.pulp_id in (?)", ids)
+        removable_unit_association.where("#{table_name}.pulp_prn in (?)", ids)
       end
     end
 
@@ -1045,7 +1045,7 @@ module Katello
     end
 
     def deb_content_url_options
-      return '' unless version_href
+      return '' unless version_prn
       return '' if backend_service(SmartProxy.pulp_primary).version_missing_structure_content?
 
       components = deb_pulp_components.join(',')
@@ -1053,11 +1053,11 @@ module Katello
       "/?comp=#{components}&rel=#{distributions}"
     end
 
-    def deb_pulp_components(version_href = self.version_href)
-      return [] if version_href.blank?
+    def deb_pulp_components(version_prn = self.version_prn)
+      return [] if version_prn.blank?
 
       pulp_api = Katello::Pulp3::Repository.instance_for_type(self, SmartProxy.pulp_primary).api.content_release_components_api
-      pulp_api.list({:repository_version => version_href}).results.map { |x| x.plain_component }.uniq
+      pulp_api.list({:repository_version => version_prn}).results.map { |x| x.plain_component }.uniq
     end
 
     def deb_sanitize_pulp_distribution(distribution)
@@ -1066,10 +1066,10 @@ module Katello
       distribution
     end
 
-    def deb_pulp_distributions(version_href = self.version_href)
-      return [] if version_href.blank?
+    def deb_pulp_distributions(version_prn = self.version_prn)
+      return [] if version_prn.blank?
       pulp_api = Katello::Pulp3::Repository.instance_for_type(self, SmartProxy.pulp_primary).api.content_release_components_api
-      pulp_api.list({:repository_version => version_href}).results.map { |x| deb_sanitize_pulp_distribution(x.distribution) }.uniq
+      pulp_api.list({:repository_version => version_prn}).results.map { |x| deb_sanitize_pulp_distribution(x.distribution) }.uniq
     end
 
     def sync_status

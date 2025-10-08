@@ -12,19 +12,19 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::Docker.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
       def self.generate_model_row(unit)
         row = {
-          pulp_id: unit[unit_identifier],
+          pulp_prn: unit[unit_identifier],
           name: unit['name'],
         }
 
-        taggable = ::Katello::DockerManifest.find_by(:pulp_id => unit['tagged_manifest'])
+        taggable = ::Katello::DockerManifest.find_by(:pulp_prn => unit['tagged_manifest'])
         taggable_type = ::Katello::DockerManifest.name
         if taggable.nil?
-          taggable = ::Katello::DockerManifestList.find_by(:pulp_id => unit['tagged_manifest'])
+          taggable = ::Katello::DockerManifestList.find_by(:pulp_prn => unit['tagged_manifest'])
           taggable_type = ::Katello::DockerManifestList.name
         end
 

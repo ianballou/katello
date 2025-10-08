@@ -3,7 +3,7 @@ security:
   errata_type: "security"
   title: "World is ending"
   severity: "Critical"
-  pulp_id: "partylikeits1999"
+  pulp_prn: "partylikeits1999"
   reboot_suggested: true
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
@@ -14,7 +14,7 @@ bugfix:
   errata_id:  "RHBA-2014-013"
   errata_type: "enhancement"
   title: "Divide by zero"
-  pulp_id: "100dividedby0"
+  pulp_prn: "100dividedby0"
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
   issued: <%= 3.days.ago %>
@@ -24,7 +24,7 @@ enhancement:
   errata_id: "RHEA-2014-111"
   errata_type: "bugfix"
   title: "bionic man"
-  pulp_id: "wecanrebuildhim"
+  pulp_prn: "wecanrebuildhim"
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
   issued: <%= 3.days.ago %>
@@ -34,7 +34,7 @@ singletonissue:
   errata_id: "RHEA-2017-007"
   errata_type: "bugfix"
   title: "singletonissue"
-  pulp_id: "singletonissue"
+  pulp_prn: "singletonissue"
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
   issued: <%= 3.days.ago %>
@@ -43,7 +43,7 @@ modular:
   errata_id: "RHEA-2019-002"
   errata_type: "bugfix"
   title: "modularissue"
-  pulp_id: "modularissue"
+  pulp_prn: "modularissue"
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
   issued: <%= 3.days.ago %>
@@ -52,7 +52,7 @@ trailing_whitespace:
   errata_id: "RHEA-2022-007"
   errata_type: "bugfix"
   title: "trailing_whitespace"
-  pulp_id: "trailing_whitespace"
+  pulp_prn: "trailing_whitespace"
   description: "You know I had to do it to em\n"
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>

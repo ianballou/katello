@@ -14,7 +14,7 @@ module Katello
     has_many :content_facets, :through => :content_facet_applicable_module_streams, :class_name => "Katello::Host::ContentFacet"
     has_many :rules, :class_name => "Katello::ContentViewModuleStreamFilterRule", :inverse_of => :module_stream, dependent: :destroy
     scoped_search on: :name, complete_value: true
-    scoped_search on: :pulp_id, complete_value: true, rename: :uuid
+    scoped_search on: :pulp_prn, complete_value: true, rename: :uuid
     scoped_search on: :stream, complete_value: true
     scoped_search on: :version, complete_value: true
     scoped_search on: :context, complete_value: true
@@ -61,7 +61,7 @@ module Katello
     end
 
     def module_spec_hash
-      {:name => name, :stream => stream, :version => version, :context => context, :arch => arch, :pulp_id => pulp_id, :id => id}.compact
+      {:name => name, :stream => stream, :version => version, :context => context, :arch => arch, :pulp_prn => pulp_prn, :id => id}.compact
     end
 
     def self.parse_module_spec(module_spec)

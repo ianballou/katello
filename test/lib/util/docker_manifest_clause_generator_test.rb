@@ -16,9 +16,9 @@ module Katello
       @man2 = katello_docker_manifests(:two)
       @man3 = katello_docker_manifests(:three)
 
-      @tag1.update!(:pulp_id => "100011")
-      @tag2.update!(:pulp_id => "100012")
-      @tag3.update!(:pulp_id => "100013")
+      @tag1.update!(:pulp_prn => "100011")
+      @tag2.update!(:pulp_prn => "100012")
+      @tag3.update!(:pulp_prn => "100013")
 
       @repo.docker_tags = [@tag1, @tag2, @tag3]
       @repo.docker_manifests = [@man1, @man2, @man3]
@@ -40,11 +40,11 @@ module Katello
       rule2 = FactoryBot.create(:katello_content_view_docker_filter_rule, :filter => @filter, :name => @tag2.name)
 
       clause_gen = setup_whitelist_filter([rule1, rule2])
-      expected = {"$or" => [{"_id" => {"$in" => [@tag1.pulp_id, @tag2.pulp_id]}}]}
+      expected = {"$or" => [{"_id" => {"$in" => [@tag1.pulp_prn, @tag2.pulp_prn]}}]}
       assert_equal expected, clause_gen.copy_clause
       assert_nil clause_gen.remove_clause
 
-      blacklist_expected = {"$or" => [{"_id" => {"$in" => [@tag1.pulp_id, @tag2.pulp_id]}}]}
+      blacklist_expected = {"$or" => [{"_id" => {"$in" => [@tag1.pulp_prn, @tag2.pulp_prn]}}]}
       clause_gen = setup_blacklist_filter([rule1, rule2])
       expected = {"$and" => [INCLUDE_ALL_TAGS, {"$nor" => [blacklist_expected]}]}
       assert_equal expected, clause_gen.copy_clause

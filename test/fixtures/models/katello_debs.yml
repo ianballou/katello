@@ -1,27 +1,27 @@
 one:
   name:         uno
-  pulp_id:      uno-uuid
+  pulp_prn:      uno-uuid
   version:      1.0
   architecture: amd64
   filename:     uno_1.0_amd64.deb
 
 one_new:
   name:         uno
-  pulp_id:      uno-uuid2
+  pulp_prn:      uno-uuid2
   version:      1.1
   architecture: amd64
   filename:     uno_1.1_amd64.deb
 
 two:
   name:         due
-  pulp_id:      due-uuid
+  pulp_prn:      due-uuid
   version:      1.0
   architecture: amd64
   filename:     due_1.0_amd64.deb
 
 three:
   name:         tre
-  pulp_id:      tre-uuid
+  pulp_prn:      tre-uuid
   version:      1.0
   architecture: amd64
   filename:     tre_1.0_amd64.deb

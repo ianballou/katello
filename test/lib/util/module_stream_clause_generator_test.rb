@@ -30,7 +30,7 @@ module Katello
                                    :filter => @filter,
                                    :module_stream => @module_stream2)
 
-      combined = {"_id" => {"$in" => [@module_stream1.pulp_id, @module_stream2.pulp_id]}}
+      combined = {"_id" => {"$in" => [@module_stream1.pulp_prn, @module_stream2.pulp_prn]}}
 
       clause_gen = setup_whitelist_filter([foo_rule, goo_rule])
       expected = combined

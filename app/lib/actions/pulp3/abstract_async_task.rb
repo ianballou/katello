@@ -23,12 +23,12 @@ module Actions
           started_task = combined_tasks.find { |task| task&.started? && !task&.done? }&.pulp_data
           if started_task
             name = started_task[:name] || started_task[:description]
-            label = get_task_label(name, started_task[:pulp_href])
+            label = get_task_label(name, started_task[:prn])
             _("waiting for Pulp to finish the task %s" % label)
           else
             pending_task = combined_tasks.find { |task| !task&.started? }&.pulp_data
             name = pending_task[:name] || pending_task[:description]
-            label = get_task_label(name, pending_task[:pulp_href])
+            label = get_task_label(name, pending_task[:prn])
             _("waiting for Pulp to start the task %s" % label) if pending_task
           end
         else
@@ -124,16 +124,16 @@ module Actions
         tasks = transform_task_response(external_task_data)
         output[:pulp_tasks] = [] if output[:pulp_tasks].nil?
         output[:task_groups] = [] if output[:task_groups].nil?
-        if tasks.detect { |task| task['task'] || (task['pulp_href'] && !task['tasks']) }
+        if tasks.detect { |task| task['task'] || (task['prn'] && !task['tasks']) }
           output[:pulp_tasks] = new_or_existing_objects(::Katello::Pulp3::Task, tasks)
           add_task_groups
         else
           output[:pulp_tasks] = []
           tasks.each do |task|
             if task['task_group']
-              output[:task_groups] << ::Katello::Pulp3::TaskGroup.new_from_href(smart_proxy, task['task_group'])
-            elsif task['pulp_href'] && task['tasks']
-              output[:task_groups] << ::Katello::Pulp3::TaskGroup.new_from_href(smart_proxy, task['pulp_href'])
+              output[:task_groups] << ::Katello::Pulp3::TaskGroup.new_from_prn(smart_proxy, task['task_group'])
+            elsif task['prn'] && task['tasks']
+              output[:task_groups] << ::Katello::Pulp3::TaskGroup.new_from_prn(smart_proxy, task['prn'])
             end
           end
         end
@@ -144,14 +144,14 @@ module Actions
       def add_task_groups
         output[:task_groups] ||= []
         pulp_tasks.each do |task|
-          if task.task_group_href && !tracking_task_group?(task.task_group_href)
-            output[:task_groups] << ::Katello::Pulp3::TaskGroup.new_from_href(smart_proxy, task.task_group_href)
+          if task.task_group_prn && !tracking_task_group?(task.task_group_prn)
+            output[:task_groups] << ::Katello::Pulp3::TaskGroup.new_from_prn(smart_proxy, task.task_group_prn)
           end
         end
       end
 
-      def tracking_task_group?(href)
-        task_groups&.any? { |group| group.href == href }
+      def tracking_task_group?(prn)
+        task_groups&.any? { |group| group.prn == prn }
       end
 
       def poll_external_task

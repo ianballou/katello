@@ -15,9 +15,9 @@ module Katello
     end
 
     def test_create
-      pulp_id = "foo"
-      assert PackageGroup.create!(:pulp_id => pulp_id)
-      assert PackageGroup.find_by(:pulp_id => pulp_id)
+      pulp_prn = "foo"
+      assert PackageGroup.create!(:pulp_prn => pulp_prn)
+      assert PackageGroup.find_by(:pulp_prn => pulp_prn)
     end
 
     def test_search_by_name
@@ -25,7 +25,7 @@ module Katello
     end
 
     def test_search_by_uuid
-      assert_equal PackageGroup.search_for("id = #{@mammals_pg.pulp_id}").first, @mammals_pg
+      assert_equal PackageGroup.search_for("id = #{@mammals_pg.pulp_prn}").first, @mammals_pg
     end
 
     def test_search_returns_none
@@ -40,10 +40,10 @@ module Katello
       filter = FactoryBot.build(:katello_content_view_package_group_filter, :inclusion => true)
       server_rule = FactoryBot.create(:katello_content_view_package_group_filter_rule,
                                    :filter => filter,
-                                   :uuid => @server_pg.pulp_id)
+                                   :uuid => @server_pg.pulp_prn)
       mammals_rule = FactoryBot.create(:katello_content_view_package_group_filter_rule,
                                    :filter => filter,
-                                   :uuid => @mammals_pg.pulp_id)
+                                   :uuid => @mammals_pg.pulp_prn)
       content_type = Katello::RepositoryTypeManager.find_content_type('package_group')
       indexer = Katello::ContentUnitIndexer.new(content_type: content_type, repository: @repo)
       repo_associations = ::Katello::RepositoryPackageGroup.where(package_group_id: @mammals_pg.id, repository_id: @repo.id)

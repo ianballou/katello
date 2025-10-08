@@ -173,7 +173,7 @@ module Katello
 
     def test_add_rules_bulk
       mammals_pg = katello_package_groups(:mammals_pg)
-      put :add_filter_rules, params: { :id => @package_group_filter, :rules_params => [{uuid: mammals_pg.pulp_id}]}
+      put :add_filter_rules, params: { :id => @package_group_filter, :rules_params => [{uuid: mammals_pg.pulp_prn}]}
       assert_response :success
     end
 

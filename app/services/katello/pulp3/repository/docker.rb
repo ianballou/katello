@@ -47,26 +47,26 @@ module Katello
         def distribution_options(path)
           {
             base_path: path,
-            repository_version: repo.version_href,
+            repository_version: repo.version_prn,
             name: "#{generate_backend_object_name}",
           }
         end
 
         def create_version(options = {})
-          api.repositories_api.add(repository_reference.repository_href,
+          api.repositories_api.add(repository_reference.repository_prn,
                                    api.class.recursive_manage_class.new(content_units: options[:add_content_units]))
-          api.repositories_api.remove(repository_reference.repository_href,
+          api.repositories_api.remove(repository_reference.repository_prn,
                                       api.class.recursive_manage_class.new(content_units: options[:remove_content_units]))
         end
 
         def tag_manifest(name, digest)
-          api.repositories_api.tag(repository_reference.repository_href,
+          api.repositories_api.tag(repository_reference.repository_prn,
                                    api.class.tag_image_class.new(tag: name, digest: digest))
         end
 
-        def add_content(content_unit_href)
-          content_unit_href = [content_unit_href] unless content_unit_href.is_a?(Array)
-          api.repositories_api.add(repository_reference.repository_href, content_units: content_unit_href)
+        def add_content(content_unit_prn)
+          content_unit_prn = [content_unit_prn] unless content_unit_prn.is_a?(Array)
+          api.repositories_api.add(repository_reference.repository_prn, content_units: content_unit_prn)
         rescue api.client_module::ApiError => e
           if e.message.include? 'Could not find the following content units'
             raise ::Katello::Errors::Pulp3Error, "Content units that do not exist in Pulp were requested to be copied."\
@@ -76,14 +76,14 @@ module Katello
           end
         end
 
-        def copy_units_recursively(unit_hrefs, clear_repo = false)
+        def copy_units_recursively(unit_prns, clear_repo = false)
           tasks = []
           if clear_repo
-            tasks << api.repositories_api.remove(repository_reference.repository_href,
+            tasks << api.repositories_api.remove(repository_reference.repository_prn,
                                                  api.class.recursive_manage_class.new(:content_units => ["*"]))
           end
-          tasks << api.repositories_api.add(repository_reference.repository_href,
-                                            api.class.recursive_manage_class.new(content_units: unit_hrefs))
+          tasks << api.repositories_api.add(repository_reference.repository_prn,
+                                            api.class.recursive_manage_class.new(content_units: unit_prns))
           tasks
         end
 
@@ -100,7 +100,7 @@ module Katello
           end
 
           if include_list_ids.empty?
-            copy_units_recursively(source_repository.docker_tags.pluck(:pulp_id).sort - exclude_list_ids, true)
+            copy_units_recursively(source_repository.docker_tags.pluck(:pulp_prn).sort - exclude_list_ids, true)
           else
             copy_units_recursively(include_list_ids - exclude_list_ids, true)
           end

@@ -68,7 +68,7 @@ module ::Actions::Pulp3
       refute_includes @repo_clone.rpms.pluck(:name), "crow"
       refute_includes @repo_clone.rpms.pluck(:name), "duck"
       refute_includes @repo_clone.rpms.pluck(:name), "stork"
-      refute_includes @repo_clone.errata.pluck(:pulp_id), "RHEA-2012:0056"
+      refute_includes @repo_clone.errata.pluck(:pulp_prn), "RHEA-2012:0056"
     end
 
     def test_yum_copy_with_errata_inclusion_filter
@@ -85,7 +85,7 @@ module ::Actions::Pulp3
       @repo_clone.reload
 
       assert_equal ['crow', 'duck', 'stork'].sort, @repo_clone.rpms.pluck(:name).sort
-      assert_equal ["RHEA-2012:0056"], @repo_clone.errata.pluck(:pulp_id)
+      assert_equal ["RHEA-2012:0056"], @repo_clone.errata.pluck(:pulp_prn)
     end
 
     def test_yum_copy_all_no_filter_rules_without_dependency_solving
@@ -514,7 +514,7 @@ module ::Actions::Pulp3
 
       refute_empty @repo.module_streams
       assert_equal @repo_clone.module_streams.size, 5
-      refute_includes @repo_clone.module_streams.pluck(:pulp_id), duck.pulp_id
+      refute_includes @repo_clone.module_streams.pluck(:pulp_prn), duck.pulp_prn
     end
   end
 
@@ -566,7 +566,7 @@ module ::Actions::Pulp3
     def test_package_groups_as_a_filter_rule
       filter = FactoryBot.create(:katello_content_view_package_group_filter, :inclusion => true)
       birds = @repo.package_groups.where(:name => "bird").first
-      FactoryBot.create(:katello_content_view_package_group_filter_rule, :filter => filter, :uuid => birds.pulp_id)
+      FactoryBot.create(:katello_content_view_package_group_filter_rule, :filter => filter, :uuid => birds.pulp_prn)
 
       module_stream_filter = FactoryBot.create(:katello_content_view_module_stream_filter, :inclusion => true)
 

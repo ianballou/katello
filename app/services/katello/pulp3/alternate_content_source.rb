@@ -79,59 +79,59 @@ module Katello
       end
 
       def create_remote
-        if smart_proxy_acs&.remote_href.nil?
+        if smart_proxy_acs&.remote_prn.nil?
           response = super
-          smart_proxy_acs.update!(remote_href: response.pulp_href)
+          smart_proxy_acs.update!(remote_prn: response.prn)
         end
       end
 
-      def get_remote(href = smart_proxy_acs.remote_href)
-        api.get_remotes_api(href: href).read(href)
+      def get_remote(prn = smart_proxy_acs.remote_prn)
+        api.get_remotes_api(prn: prn).read(prn)
       end
 
-      def update_remote(href = smart_proxy_acs.remote_href)
-        api.get_remotes_api(href: href).partial_update(href, remote_options)
+      def update_remote(prn = smart_proxy_acs.remote_prn)
+        api.get_remotes_api(prn: prn).partial_update(prn, remote_options)
       end
 
       def delete_remote(options = {})
-        options[:href] ||= smart_proxy_acs.remote_href
-        ignore_404_exception { api.get_remotes_api(href: options[:href]).delete(options[:href]) } if options[:href]
+        options[:prn] ||= smart_proxy_acs.remote_prn
+        ignore_404_exception { api.get_remotes_api(prn: options[:prn]).delete(options[:prn]) } if options[:prn]
       end
 
       def create
-        if smart_proxy_acs&.alternate_content_source_href.nil?
+        if smart_proxy_acs&.alternate_content_source_prn.nil?
           paths = acs.subpaths.deep_dup
           if acs.content_type == ::Katello::Repository::FILE_TYPE && acs.subpaths.present?
             paths = insert_pulp_manifest!(paths)
           end
           response = api.alternate_content_source_api.create(name: generate_backend_object_name, paths: paths.sort,
-                                                             remote: smart_proxy_acs.remote_href)
-          smart_proxy_acs.update!(alternate_content_source_href: response.pulp_href)
+                                                             remote: smart_proxy_acs.remote_prn)
+          smart_proxy_acs.update!(alternate_content_source_prn: response.prn)
           return response
         end
       end
 
-      def read(href = smart_proxy_acs.alternate_content_source_href)
-        api.alternate_content_source_api.read(href)
+      def read(prn = smart_proxy_acs.alternate_content_source_prn)
+        api.alternate_content_source_api.read(prn)
       end
 
       def update
-        href = smart_proxy_acs.alternate_content_source_href
+        prn = smart_proxy_acs.alternate_content_source_prn
         paths = acs.subpaths.deep_dup
         if acs.content_type == ::Katello::Repository::FILE_TYPE && acs.subpaths.present?
           paths = insert_pulp_manifest!(paths)
         end
-        api.alternate_content_source_api.update(href, name: generate_backend_object_name, paths: paths.sort, remote: smart_proxy_acs.remote_href)
+        api.alternate_content_source_api.update(prn, name: generate_backend_object_name, paths: paths.sort, remote: smart_proxy_acs.remote_prn)
       end
 
       def delete_alternate_content_source
-        href = smart_proxy_acs.alternate_content_source_href
-        ignore_404_exception { api.alternate_content_source_api.delete(href) } if href
+        prn = smart_proxy_acs.alternate_content_source_prn
+        ignore_404_exception { api.alternate_content_source_api.delete(prn) } if prn
       end
 
       def refresh
-        href = smart_proxy_acs.alternate_content_source_href
-        api.alternate_content_source_api.refresh(href)
+        prn = smart_proxy_acs.alternate_content_source_prn
+        api.alternate_content_source_api.refresh(prn)
       end
 
       private

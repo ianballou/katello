@@ -11,7 +11,7 @@ module Katello
           # For every empty APT library instance repository we must add at least a release component to
           # ensure we have a publishable repo with consumable metadata. Otherwise smart proxy syncs will
           # fail, and consuming hosts will choke on empty repos.
-          opts = {:repository => repository_reference.repository_href, :component => "empty", :distribution => "katello"}
+          opts = {:repository => repository_reference.repository_prn, :component => "empty", :distribution => "katello"}
           api.content_release_components_api.create(opts)
         end
 
@@ -53,10 +53,10 @@ module Katello
           # This could be because packages were uploaded with Katello < 4.12
           # It may also affect filtered CV versions created with very old Katello versions.
           # This method can identify such cases, so that we may fall back to simple publishing.
-          return false if repo.version_href.blank?
+          return false if repo.version_prn.blank?
           # We cannot just use api here, because this is sometimes the proxy api, and we always want to talk to the primary!
           api_primary = self.class.instance_for_type(repo, ::SmartProxy.pulp_primary).api
-          version = api_primary.repository_versions_api.read(repo.version_href)
+          version = api_primary.repository_versions_api.read(repo.version_prn)
           apt_content_types = version&.content_summary&.present&.keys
           return apt_content_types.include?('deb.package') && !apt_content_types.include?('deb.package_release_component')
         end
@@ -71,14 +71,14 @@ module Katello
             popts.merge!({ structured: true })
             popts.merge!({ simple: true }) unless repository.deb_using_structured_apt?
           end
-          popts[:signing_service] = ss[0].pulp_href if ss && ss.length == 1
+          popts[:signing_service] = ss[0].prn if ss && ss.length == 1
           popts
         end
 
         def distribution_options(path)
           {
             base_path: path,
-            publication: repo.publication_href,
+            publication: repo.publication_prn,
             name: "#{generate_backend_object_name}",
           }
         end
@@ -96,7 +96,7 @@ module Katello
             data.config = []
             repo_id_map.each do |source_repo_ids, dest_repo_id_map|
               dest_repo = ::Katello::Repository.find(dest_repo_id_map[:dest_repo])
-              dest_repo_href = ::Katello::Pulp3::Repository::Apt.new(dest_repo, SmartProxy.pulp_primary).repository_reference.repository_href
+              dest_repo_prn = ::Katello::Pulp3::Repository::Apt.new(dest_repo, SmartProxy.pulp_primary).repository_reference.repository_prn
               content_unit_hrefs = dest_repo_id_map[:content_unit_hrefs]
               # Not needed during incremental update due to dest_base_version
               # -> Unless incrementally updating a CV repo that is a soft copy of its library instance.
@@ -104,11 +104,11 @@ module Katello
               # Don't perform extra content actions if the repo is a soft copy of its library instance.
               # Taken care of by the IncrementalUpdate action.
               if !dest_repo_id_map[:base_version] && !dest_repo.soft_copy_of_library?
-                tasks << remove_all_content_from_repo(dest_repo_href)
+                tasks << remove_all_content_from_repo(dest_repo_prn)
               end
               source_repo_ids.each do |source_repo_id|
-                source_repo_version = ::Katello::Repository.find(source_repo_id).version_href
-                config = { source_repo_version: source_repo_version, dest_repo: dest_repo_href, content: content_unit_hrefs }
+                source_repo_version = ::Katello::Repository.find(source_repo_id).version_prn
+                config = { source_repo_version: source_repo_version, dest_repo: dest_repo_prn, content: content_unit_hrefs }
                 config[:dest_base_version] = dest_repo_id_map[:base_version] if dest_repo_id_map[:base_version]
                 data.config << config
               end
@@ -181,22 +181,22 @@ module Katello
           tasks = []
           repo_id_map.each do |_source_repo_ids, dest_repo_id_map|
             dest_repo = ::Katello::Repository.find(dest_repo_id_map[:dest_repo])
-            dest_repo_href = ::Katello::Pulp3::Repository::Apt.new(dest_repo, SmartProxy.pulp_primary).repository_reference.repository_href
-            tasks << remove_all_content_from_repo(dest_repo_href)
+            dest_repo_prn = ::Katello::Pulp3::Repository::Apt.new(dest_repo, SmartProxy.pulp_primary).repository_reference.repository_prn
+            tasks << remove_all_content_from_repo(dest_repo_prn)
           end
           tasks
         end
 
-        def remove_all_content_from_repo(repo_href)
+        def remove_all_content_from_repo(repo_prn)
           data = PulpDebClient::RepositoryAddRemoveContent.new(
             remove_content_units: ['*'])
-          api.repositories_api.modify(repo_href, data)
+          api.repositories_api.modify(repo_prn, data)
         end
 
         def remove_all_content
           data = PulpDebClient::RepositoryAddRemoveContent.new(
             remove_content_units: ['*'])
-          api.repositories_api.modify(repository_reference.repository_href, data)
+          api.repositories_api.modify(repository_reference.repository_prn, data)
         end
 
         def add_filter_content(source_repo_ids, filters, filter_list_map)
@@ -218,7 +218,7 @@ module Katello
           if (filter_list_map[:whitelist_ids].empty? && filters.select { |filter| filter.inclusion }.empty?)
             filter_list_map[:whitelist_ids] += source_repo_ids.collect do |source_repo_id|
               source_repo = ::Katello::Repository.find(source_repo_id)
-              source_repo.debs.pluck(:pulp_id).sort
+              source_repo.debs.pluck(:pulp_prn).sort
             end
           end
           filter_list_map
@@ -245,7 +245,7 @@ module Katello
         end
 
         def copy_content_for_source(source_repository, options = {})
-          # copy_units_by_href(source_repository.debs.pluck(:pulp_id))
+          # copy_units_by_href(source_repository.debs.pluck(:pulp_prn))
           filters = ContentViewDebFilter.where(:id => options[:filter_ids])
 
           whitelist_ids = []
@@ -258,15 +258,15 @@ module Katello
             end
           end
 
-          whitelist_ids = source_repository.debs.pluck(:pulp_id).sort if (whitelist_ids.empty? && filters.select { |filter| filter.inclusion }.empty?)
+          whitelist_ids = source_repository.debs.pluck(:pulp_prn).sort if (whitelist_ids.empty? && filters.select { |filter| filter.inclusion }.empty?)
 
           content_unit_hrefs = whitelist_ids - blacklist_ids
 
           pulp_deb_copy_serializer = PulpDebClient::Copy.new
           pulp_deb_copy_serializer.dependency_solving = false
           pulp_deb_copy_serializer.config = [{
-            source_repo_version: source_repository.version_href,
-            dest_repo: repository_reference.repository_href,
+            source_repo_version: source_repository.version_prn,
+            dest_repo: repository_reference.repository_prn,
             content: content_unit_hrefs,
           }]
 
@@ -274,7 +274,7 @@ module Katello
           remove_all = true if remove_all.nil?
 
           if remove_all
-            remove_all_content_from_repo(repository_reference.repository_href)
+            remove_all_content_from_repo(repository_reference.repository_prn)
           end
 
           copy_content_chunked(pulp_deb_copy_serializer)

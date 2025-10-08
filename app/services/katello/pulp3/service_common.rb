@@ -35,7 +35,7 @@ module Katello
         reformat_api_exception do
           response = api.get_remotes_api(url: remote_options[:url]).create(remote_file_data)
           #delete is async, but if its not properly deleted, orphan cleanup will take care of it later
-          delete_remote(href: response.pulp_href)
+          delete_remote(prn: response.prn)
         end
       end
 

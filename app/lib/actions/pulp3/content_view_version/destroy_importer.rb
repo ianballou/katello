@@ -19,7 +19,7 @@ module Actions
             path: input[:path],
             metadata_map: metadata_map
           )
-          import.destroy_importer(input[:importer_data][:pulp_href])
+          import.destroy_importer(input[:importer_data][:importer_prn])
         end
       end
     end

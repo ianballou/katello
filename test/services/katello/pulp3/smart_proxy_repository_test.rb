@@ -17,9 +17,9 @@ module Katello
         ::Katello::SmartProxyAlternateContentSource.destroy_all
 
         pulp_remotes = [
-          PulpRpmClient::RpmRpmRemoteResponse.new(name: rhel7.pulp_id, pulp_href: rhel7_href),
-          PulpRpmClient::RpmRpmRemoteResponse.new(name: rhel6.pulp_id, pulp_href: 'rhel6'),
-          PulpRpmClient::RpmRpmRemoteResponse.new(name: fedora.pulp_id, pulp_href: 'fedora'),
+          PulpRpmClient::RpmRpmRemoteResponse.new(name: rhel7.pulp_prn, pulp_href: rhel7_href),
+          PulpRpmClient::RpmRpmRemoteResponse.new(name: rhel6.pulp_prn, pulp_href: 'rhel6'),
+          PulpRpmClient::RpmRpmRemoteResponse.new(name: fedora.pulp_prn, pulp_href: 'fedora'),
         ]
 
         smart_proxy_mirror_repo.expects(:pulp3_enabled_repo_types).once.returns([::Katello::RepositoryTypeManager.find(:yum)])
@@ -54,7 +54,7 @@ module Katello
         dist_href = 'dist_href'
         api = ::Katello::Pulp3::Api::Yum.new(@proxy)
         api.expects(:publications_list_all).with(repository_version: ver_href).once.returns([::PulpRpmClient::RpmRpmPublicationResponse.new(pulp_href: pub_href)])
-        api.expects(:distributions_list_all).once.returns([::PulpRpmClient::RpmRpmDistributionResponse.new(pulp_href: dist_href, publication: pub_href, name: fedora.pulp_id)])
+        api.expects(:distributions_list_all).once.returns([::PulpRpmClient::RpmRpmDistributionResponse.new(pulp_href: dist_href, publication: pub_href, name: fedora.pulp_prn)])
 
         errors = @smart_proxy_mirror_repo.report_misconfigured_repository_version(api, ver_href)
         assert_includes errors, "Completely resync (skip metadata check) repositories with the following paths to the smart proxy with ID #{@proxy.id}: " \
@@ -69,7 +69,7 @@ module Katello
         ver_href = 'ver_href'
         dist_href = 'dist_href'
         api = ::Katello::Pulp3::Api::Docker.new(@proxy)
-        api.expects(:distributions_list_all).once.returns([::PulpContainerClient::ContainerContainerDistributionResponse.new(pulp_href: dist_href, repository_version: ver_href, name: busybox.pulp_id)])
+        api.expects(:distributions_list_all).once.returns([::PulpContainerClient::ContainerContainerDistributionResponse.new(pulp_href: dist_href, repository_version: ver_href, name: busybox.pulp_prn)])
 
         errors = @smart_proxy_mirror_repo.report_misconfigured_repository_version(api, ver_href)
         assert_includes errors, "Completely resync (skip metadata check) repositories with the following paths to the smart proxy with ID #{@proxy.id}: " \
@@ -125,7 +125,7 @@ module Katello
       end
 
       def test_report_misconfigured_repository_version_yum_content_view
-        fedora = katello_repositories(:fedora_17_x86_64).clones.find { |c| c.pulp_id == 'fedora_17_library_library_view' }
+        fedora = katello_repositories(:fedora_17_x86_64).clones.find { |c| c.pulp_prn == 'fedora_17_library_library_view' }
         ver_href = 'ver_href'
         pub_href = 'pub_href'
         dist_href = 'dist_href'

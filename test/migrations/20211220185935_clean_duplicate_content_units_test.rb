@@ -29,8 +29,8 @@ module Katello
 
     def test_duplicates_module_stream
       original_stream = katello_module_streams(:river)
-      stream = Katello::ModuleStream.create!(:pulp_id => original_stream.pulp_id) #associated_to_repo
-      Katello::ModuleStream.create!(:pulp_id => original_stream.pulp_id) #not associated to repo
+      stream = Katello::ModuleStream.create!(:pulp_prn => original_stream.pulp_prn) #associated_to_repo
+      Katello::ModuleStream.create!(:pulp_prn => original_stream.pulp_prn) #not associated to repo
 
       Katello::ContentViewModuleStreamFilterRule.create!(module_stream_id: stream.id, content_view_filter_id: katello_content_view_filters(:populated_module_stream_filter).id)
       Katello::ContentFacetApplicableModuleStream.create!(module_stream_id: stream.id, content_facet_id: katello_content_facets(:content_facet_one).id)
@@ -41,9 +41,9 @@ module Katello
 
       katello_repositories(:fedora_17_x86_64).module_streams << stream
 
-      assert_equal 3, Katello::ModuleStream.where(:pulp_id => original_stream.pulp_id).count
+      assert_equal 3, Katello::ModuleStream.where(:pulp_prn => original_stream.pulp_prn).count
       migrate_up
-      assert_equal 1, Katello::ModuleStream.where(:pulp_id => original_stream.pulp_id).count
+      assert_equal 1, Katello::ModuleStream.where(:pulp_prn => original_stream.pulp_prn).count
     end
 
     def test_delete_all_module_profiles
@@ -68,7 +68,7 @@ module Katello
 
     def test_ansible_tag
       name = 'ansible-tag-1'
-      collection = Katello::AnsibleCollection.create!(:pulp_id => 'my_pulp_id')
+      collection = Katello::AnsibleCollection.create!(:pulp_prn => 'my_pulp_prn')
       tag1 = Katello::AnsibleTag.create(name: name)
       tag2 = Katello::AnsibleTag.create(name: name)
       Katello::AnsibleCollectionTag.create!(ansible_collection_id: collection.id, ansible_tag_id: tag1.id)
@@ -80,7 +80,7 @@ module Katello
     end
 
     def test_ansible_collection_tags
-      collection = Katello::AnsibleCollection.create!(:pulp_id => 'my_pulp_id')
+      collection = Katello::AnsibleCollection.create!(:pulp_prn => 'my_pulp_prn')
       tag1 = Katello::AnsibleTag.create(name: name)
 
       Katello::AnsibleCollectionTag.create!(ansible_collection_id: collection.id, ansible_tag_id: tag1.id)
@@ -93,20 +93,20 @@ module Katello
 
     def test_generic_content_units
       unit = katello_generic_content_units(:one)
-      dup = Katello::GenericContentUnit.create!(pulp_id: unit.pulp_id)
+      dup = Katello::GenericContentUnit.create!(pulp_id: unit.pulp_prn)
 
       unit.repositories.first.generic_content_units << dup
 
-      assert_equal 2, Katello::GenericContentUnit.where(pulp_id: unit.pulp_id).count
+      assert_equal 2, Katello::GenericContentUnit.where(pulp_id: unit.pulp_prn).count
       migrate_up
-      assert_equal 1, Katello::GenericContentUnit.where(pulp_id: unit.pulp_id).count
+      assert_equal 1, Katello::GenericContentUnit.where(pulp_id: unit.pulp_prn).count
     end
 
     def test_docker_manifest_list
-      pulp_id = 'list-id'
-      list = Katello::DockerManifestList.create(pulp_id: pulp_id)
-      dup = Katello::DockerManifestList.create(pulp_id: pulp_id)
-      _dup2 = Katello::DockerManifestList.create(pulp_id: pulp_id)
+      pulp_prn = 'list-id'
+      list = Katello::DockerManifestList.create(pulp_id: pulp_prn)
+      dup = Katello::DockerManifestList.create(pulp_id: pulp_prn)
+      _dup2 = Katello::DockerManifestList.create(pulp_id: pulp_prn)
 
       manifest = katello_docker_manifests(:one)
       manifest.docker_manifest_lists << list
@@ -117,16 +117,16 @@ module Katello
       repo.docker_manifest_lists << list
       repo.docker_manifest_lists << dup
 
-      assert_equal 3, Katello::DockerManifestList.where(pulp_id: pulp_id).count
+      assert_equal 3, Katello::DockerManifestList.where(pulp_id: pulp_prn).count
       migrate_up
-      assert_equal 1, Katello::DockerManifestList.where(pulp_id: pulp_id).count
+      assert_equal 1, Katello::DockerManifestList.where(pulp_id: pulp_prn).count
     end
 
     def test_docker_manifest
       list = Katello::DockerManifestList.create(pulp_id: 'mymanifest')
 
       manifest = katello_docker_manifests(:one)
-      dup = Katello::DockerManifest.create!(pulp_id: manifest.pulp_id)
+      dup = Katello::DockerManifest.create!(pulp_id: manifest.pulp_prn)
 
       manifest.docker_manifest_lists << list
       dup.docker_manifest_lists << list
@@ -135,9 +135,9 @@ module Katello
       repo.docker_manifests << manifest
       repo.docker_manifests << dup
 
-      assert_equal 2, Katello::DockerManifest.where(pulp_id: manifest.pulp_id).count
+      assert_equal 2, Katello::DockerManifest.where(pulp_id: manifest.pulp_prn).count
       migrate_up
-      assert_equal 1, Katello::DockerManifest.where(pulp_id: manifest.pulp_id).count
+      assert_equal 1, Katello::DockerManifest.where(pulp_id: manifest.pulp_prn).count
     end
   end
 end

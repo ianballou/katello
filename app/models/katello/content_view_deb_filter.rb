@@ -27,7 +27,7 @@ module Katello
       deb_filenames = deb_filenames.uniq
 
       debs = Deb.in_repositories(repo)
-      debs.where(filename: deb_filenames).pluck(:pulp_id).flatten.uniq
+      debs.where(filename: deb_filenames).pluck(:pulp_prn).flatten.uniq
     end
 
     def self.generate_deb_clauses(package_filenames = [])

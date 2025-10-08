@@ -17,12 +17,12 @@ module Katello
         @smart_proxy = smart_proxy
       end
 
-      def self.version_href?(href)
-        /.*\/versions\/\d*\//.match(href)
+      def self.version_prn?(prn)
+        /.*\/versions\/\d*\//.match(prn)
       end
 
-      def self.publication_href?(href)
-        href.include?('/publications/')
+      def self.publication_prn?(prn)
+        prn.include?('/publications/')
       end
 
       def partial_repo_path
@@ -52,12 +52,12 @@ module Katello
       end
 
       def published?
-        !repo.publication_href.nil?
+        !repo.publication_prn.nil?
       end
 
-      def repair(repository_version_href)
+      def repair(repository_version_prn)
         data = api.repair_class.new
-        api.repository_versions_api.repair(repository_version_href, data)
+        api.repository_versions_api.repair(repository_version_prn, data)
       end
 
       def skip_types
@@ -70,18 +70,18 @@ module Katello
 
       def create_remote
         response = super
-        repo.update!(:remote_href => response.pulp_href)
+        repo.update!(:remote_prn => response.prn)
       end
 
       def update_remote
-        href = repo.remote_href
+        prn = repo.remote_prn
         if remote_options[:url].blank?
-          if href
-            repo.update(remote_href: nil)
-            delete_remote(href: href)
+          if prn
+            repo.update(remote_prn: nil)
+            delete_remote(prn: prn)
           end
         else
-          if href
+          if prn
             remote_partial_update
           else
             create_remote
@@ -92,20 +92,20 @@ module Katello
 
       def remote_partial_update
         url_type = remote_options[:url]&.start_with?('uln') ? 'uln' : 'default'
-        remote_type = repo.remote_href.start_with?('/pulp/api/v3/remotes/rpm/uln/') ? 'uln' : 'default'
-        href = repo.remote_href
+        remote_type = repo.remote_prn.start_with?('/pulp/api/v3/remotes/rpm/uln/') ? 'uln' : 'default'
+        prn = repo.remote_prn
 
         if url_type == remote_type
-          api.get_remotes_api(href: href).partial_update(href, remote_options)
+          api.get_remotes_api(prn: prn).partial_update(prn, remote_options)
         else # We need to recreate a remote of the correct type!
           create_remote
-          delete_remote(href: href)
+          delete_remote(prn: prn)
         end
       end
 
       def delete_remote(options = {})
-        options[:href] ||= repo.remote_href
-        ignore_404_exception { api.get_remotes_api(href: options[:href]).delete(options[:href]) } if options[:href]
+        options[:prn] ||= repo.remote_prn
+        ignore_404_exception { api.get_remotes_api(prn: options[:prn]).delete(options[:prn]) } if options[:prn]
       end
 
       def self.instance_for_type(repo, smart_proxy)
@@ -147,12 +147,12 @@ module Katello
         tasks.compact
       end
 
-      def get_remote(href = repo.remote_href)
-        api.get_remotes_api(href: href).read(href)
+      def get_remote(prn = repo.remote_prn)
+        api.get_remotes_api(prn: prn).read(prn)
       end
 
-      def get_distribution(href = distribution_reference.href)
-        api.get_distribution(href)
+      def get_distribution(prn = distribution_reference.prn)
+        api.get_distribution(prn)
       end
 
       def distribution_needs_update?
@@ -180,7 +180,7 @@ module Katello
           RepositoryReference.where(
             root_repository_id: repo.root_id,
             content_view_id: repo.content_view.id,
-            repository_href: response.pulp_href).create!
+            repository_prn: response.prn).create!
           response
         end
       end
@@ -192,7 +192,7 @@ module Katello
       end
 
       def update
-        api.repositories_api.update(repository_reference.try(:repository_href), create_options)
+        api.repositories_api.update(repository_reference.try(:repository_prn), create_options)
       end
 
       def list(options)
@@ -200,22 +200,22 @@ module Katello
       end
 
       def read
-        api.repositories_api.read(repository_reference.try(:repository_href))
+        api.repositories_api.read(repository_reference.try(:repository_prn))
       end
 
       def delete_repository(repo_reference = repository_reference)
-        href = repo_reference.try(:repository_href)
+        prn = repo_reference.try(:repository_prn)
         repo_reference.try(:destroy)
-        ignore_404_exception { api.repositories_api.delete(href) } if href
+        ignore_404_exception { api.repositories_api.delete(prn) } if prn
       end
 
       def sync(options = {})
         repository_sync_url_data = api.repository_sync_url_class.new(sync_url_params(options))
-        [api.repositories_api.sync(repository_reference.repository_href, repository_sync_url_data)]
+        [api.repositories_api.sync(repository_reference.repository_prn, repository_sync_url_data)]
       end
 
       def sync_url_params(_sync_options)
-        params = {remote: repo.remote_href, mirror: repo.root.mirroring_policy == Katello::RootRepository::MIRRORING_POLICY_CONTENT}
+        params = {remote: repo.remote_prn, mirror: repo.root.mirroring_policy == Katello::RootRepository::MIRRORING_POLICY_CONTENT}
         params[:skip_types] = skip_types if (skip_types && repo.root.mirroring_policy != Katello::RootRepository::MIRRORING_POLICY_COMPLETE)
         params
       end
@@ -226,12 +226,12 @@ module Katello
       end
 
       def delete_publication
-        ignore_404_exception { api.publications_api.delete(repo.publication_href) } if repo.publication_href
+        ignore_404_exception { api.publications_api.delete(repo.publication_prn) } if repo.publication_prn
       end
 
       def publication_options(repository)
         {
-          repository_version: repository.version_href,
+          repository_version: repository.version_prn,
         }
       end
 
@@ -248,15 +248,15 @@ module Katello
         dist_ref = distribution_reference
 
         if dist && !dist_ref
-          save_distribution_references([dist.pulp_href])
+          save_distribution_references([dist.prn])
           return update_distribution
         end
 
         if dist && dist_ref
           # If the saved distribution reference is wrong, delete it and use the existing distribution
-          if dist.pulp_href != dist_ref.href
+          if dist.prn != dist_ref.prn
             dist_ref.destroy
-            save_distribution_references([dist.pulp_href])
+            save_distribution_references([dist.prn])
           end
           return update_distribution
         end
@@ -270,7 +270,7 @@ module Katello
           if e.message.include?("\"base_path\":[\"This field must be unique.\"]") ||
               e.message.include?("\"base_path\":[\"Overlaps with existing distribution\"")
             dist = lookup_distributions(base_path: repo.relative_path).first
-            save_distribution_references([dist.pulp_href])
+            save_distribution_references([dist.prn])
             return update_distribution
           else
             raise e
@@ -290,8 +290,8 @@ module Katello
         api.distributions_api.list(args).results
       end
 
-      def read_distribution(href = distribution_reference.href)
-        ignore_404_exception { api.distributions_api.read(href) }
+      def read_distribution(prn = distribution_reference.prn)
+        ignore_404_exception { api.distributions_api.read(prn) }
       end
 
       def update_distribution
@@ -300,14 +300,14 @@ module Katello
           unless ::Katello::RepositoryTypeManager.find(repo.content_type).pulp3_skip_publication
             fail_missing_publication(options[:publication])
           end
-          distribution_reference.update(:content_guard_href => options[:content_guard])
-          api.distributions_api.partial_update(distribution_reference.href, options)
+          distribution_reference.update(:content_guard_prn => options[:content_guard])
+          api.distributions_api.partial_update(distribution_reference.prn, options)
         end
       end
 
-      def copy_units_by_href(unit_hrefs)
+      def copy_units_by_href(unit_prns)
         tasks = []
-        unit_hrefs.each_slice(COPY_UNIT_PAGE_SIZE) do |slice|
+        unit_prns.each_slice(COPY_UNIT_PAGE_SIZE) do |slice|
           tasks << create_version(:add_content_units => slice)
         end
         tasks
@@ -316,20 +316,20 @@ module Katello
       def copy_all(source_repository, options = {})
         tasks = []
         if options[:remove_all]
-          tasks << api.repositories_api.modify(repository_reference.repository_href, remove_content_units: ['*'])
+          tasks << api.repositories_api.modify(repository_reference.repository_prn, remove_content_units: ['*'])
         end
 
         if options[:mirror] && api.class.respond_to?(:add_remove_content_class)
           data = api.class.add_remove_content_class.new(
-                    base_version: source_repository.version_href)
+                    base_version: source_repository.version_prn)
 
-          tasks << api.repositories_api.modify(repository_reference.repository_href, data)
+          tasks << api.repositories_api.modify(repository_reference.repository_prn, data)
           tasks
         elsif api.respond_to? :copy_api
           data = api.class.copy_class.new
           data.config = [{
-            source_repo_version: source_repository.version_href,
-            dest_repo: repository_reference.repository_href,
+            source_repo_version: source_repository.version_prn,
+            dest_repo: repository_reference.repository_prn,
           }]
           tasks << api.copy_api.copy_content(data)
           tasks
@@ -339,52 +339,52 @@ module Katello
       end
 
       def copy_version(from_repository)
-        create_version(:base_version => from_repository.version_href)
+        create_version(:base_version => from_repository.version_prn)
       end
 
       def version_zero?
-        repo.version_href.ends_with?('/versions/0/')
+        repo.version_prn.ends_with?('/versions/0/')
       end
 
       def delete_version
-        ignore_404_exception { api.repository_versions_api.delete(repo.version_href) } unless version_zero?
+        ignore_404_exception { api.repository_versions_api.delete(repo.version_prn) } unless version_zero?
       rescue api.api_exception_class => e
         if e.message.include?("are currently being used to distribute content")
           Rails.logger.warn "Exception when calling repository_versions_api->delete: #{e}"
-          publication_href = repo.publication_href
-          Rails.logger.warn "Trying to delete publication #{publication_href} for repository #{repo.id}}"
-          Rails.logger.error "Could not delete version: #{repo.version_href} because conflicting publication could not be looked up" unless publication_href
-          if publication_href
-            ignore_404_exception { api.publications_api.delete(publication_href) }
-            ignore_404_exception { api.repository_versions_api.delete(repo.version_href) }
+          publication_prn = repo.publication_prn
+          Rails.logger.warn "Trying to delete publication #{publication_prn} for repository #{repo.id}}"
+          Rails.logger.error "Could not delete version: #{repo.version_prn} because conflicting publication could not be looked up" unless publication_prn
+          if publication_prn
+            ignore_404_exception { api.publications_api.delete(publication_prn) }
+            ignore_404_exception { api.repository_versions_api.delete(repo.version_prn) }
           end
         end
       end
 
       def create_version(options = {})
-        api.repositories_api.modify(repository_reference.repository_href, options)
+        api.repositories_api.modify(repository_reference.repository_prn, options)
       end
 
-      def save_distribution_references(hrefs)
-        hrefs.each do |href|
-          pulp3_distribution_data = api.get_distribution(href)
-          path, content_guard_href = pulp3_distribution_data&.base_path, pulp3_distribution_data&.content_guard
+      def save_distribution_references(prns)
+        prns.each do |prn|
+          pulp3_distribution_data = api.get_distribution(prn)
+          path, content_guard_prn = pulp3_distribution_data&.base_path, pulp3_distribution_data&.content_guard
           if distribution_reference
-            found_distribution = read_distribution(distribution_reference.href)
+            found_distribution = read_distribution(distribution_reference.prn)
             unless found_distribution
               distribution_reference.destroy
             end
           end
           unless distribution_reference
             # Ensure that duplicates won't be created in the case of a race condition
-            DistributionReference.where(path: path, href: href, repository_id: repo.id, content_guard_href: content_guard_href).first_or_create!
+            DistributionReference.where(path: path, prn: prn, repository_id: repo.id, content_guard_prn: content_guard_prn).first_or_create!
           end
         end
       end
 
       def delete_distributions
         if (dist_ref = distribution_reference)
-          ignore_404_exception { api.delete_distribution(dist_ref.href) }
+          ignore_404_exception { api.delete_distribution(dist_ref.prn) }
           dist_ref.destroy!
         end
       end
@@ -393,7 +393,7 @@ module Katello
         path = relative_path
         dists = lookup_distributions(base_path: path)
 
-        task = api.delete_distribution(dists.first.pulp_href) if dists.first
+        task = api.delete_distribution(dists.first.prn) if dists.first
         Katello::Pulp3::DistributionReference.where(:path => path).destroy_all
         task
       end
@@ -445,7 +445,7 @@ module Katello
         if root.unprotected
           secured_distribution_options[:content_guard] = nil
         else
-          secured_distribution_options[:content_guard] = ::Katello::Pulp3::ContentGuard.first.pulp_href
+          secured_distribution_options[:content_guard] = ::Katello::Pulp3::ContentGuard.first.pulp_prn
         end
         secured_distribution_options.merge!(distribution_options(path))
       end
@@ -486,15 +486,15 @@ module Katello
         options
       end
 
-      def lookup_version(href)
-        api.repository_versions_api.read(href) if href
+      def lookup_version(prn)
+        api.repository_versions_api.read(prn) if prn
       rescue api.api_exception_class => e
         Rails.logger.error "Exception when calling repository_versions_api->read: #{e}"
         nil
       end
 
-      def lookup_publication(href)
-        api.publications_api.read(href) if href
+      def lookup_publication(prn)
+        api.publications_api.read(prn) if prn
       rescue api.api_exception_class => e
         Rails.logger.error "Exception when calling publications_api->read: #{e}"
         nil
@@ -502,27 +502,27 @@ module Katello
 
       def remove_content(content_units)
         if repo.root.content_type == "docker"
-          api.repositories_api.remove(repository_reference.repository_href, content_units: content_units.map(&:pulp_id))
+          api.repositories_api.remove(repository_reference.repository_prn, content_units: content_units.map(&:pulp_prn))
         else
-          api.repositories_api.modify(repository_reference.repository_href, remove_content_units: content_units.map(&:pulp_id))
+          api.repositories_api.modify(repository_reference.repository_prn, remove_content_units: content_units.map(&:pulp_prn))
         end
       end
 
-      def repository_import_content(artifact_href, options = {})
+      def repository_import_content(artifact_prn, options = {})
         ostree_import = PulpOstreeClient::OstreeRepoImport.new
-        ostree_import.artifact = artifact_href
+        ostree_import.artifact = artifact_prn
         ostree_import.repository_name = options[:ostree_repository_name]
         ostree_import.ref = options[:ostree_ref]
-        api.repositories_api.import_commits(repository_reference.repository_href, ostree_import)
+        api.repositories_api.import_commits(repository_reference.repository_prn, ostree_import)
       end
 
-      def add_content(content_unit_href, remove_all_units = false)
-        content_unit_href = [content_unit_href] unless content_unit_href.is_a?(Array)
+      def add_content(content_unit_prn, remove_all_units = false)
+        content_unit_prn = [content_unit_prn] unless content_unit_prn.is_a?(Array)
         if remove_all_units
-          api.repositories_api.modify(repository_reference.repository_href, remove_content_units: ['*'])
-          api.repositories_api.modify(repository_reference.repository_href, add_content_units: content_unit_href)
+          api.repositories_api.modify(repository_reference.repository_prn, remove_content_units: ['*'])
+          api.repositories_api.modify(repository_reference.repository_prn, add_content_units: content_unit_prn)
         else
-          api.repositories_api.modify(repository_reference.repository_href, add_content_units: content_unit_href)
+          api.repositories_api.modify(repository_reference.repository_prn, add_content_units: content_unit_prn)
         end
       rescue api.client_module::ApiError => e
         if e.message.include? 'Could not find the following content units'
@@ -534,14 +534,14 @@ module Katello
         end
       end
 
-      def add_content_for_repo(repository_href, content_unit_href)
-        content_unit_href = [content_unit_href] unless content_unit_href.is_a?(Array)
-        api.repositories_api.modify(repository_href, add_content_units: content_unit_href)
+      def add_content_for_repo(repository_prn, content_unit_prn)
+        content_unit_prn = [content_unit_prn] unless content_unit_prn.is_a?(Array)
+        api.repositories_api.modify(repository_prn, add_content_units: content_unit_prn)
       rescue api.client_module::ApiError => e
         if e.message.include? 'Could not find the following content units'
           raise ::Katello::Errors::Pulp3Error, "Content units that do not exist in Pulp were requested to be copied."\
             " Please run `foreman-rake katello:delete_orphaned_content` to fix the following repository:"\
-            " #{::Katello::Pulp3::RepositoryReference.find_by(repository_href: repository_href).root_repository.name}. Original error: #{e.message}"
+            " #{::Katello::Pulp3::RepositoryReference.find_by(repository_prn: repository_prn).root_repository.name}. Original error: #{e.message}"
         else
           raise e
         end
@@ -558,8 +558,8 @@ module Katello
         root.retain_package_versions_count.to_i
       end
 
-      def fail_missing_publication(publication_href)
-        unless lookup_publication(publication_href)
+      def fail_missing_publication(publication_prn)
+        unless lookup_publication(publication_prn)
           fail _("The repository's publication is missing. Please run a 'complete sync' on %s." % repo.name)
         end
       end

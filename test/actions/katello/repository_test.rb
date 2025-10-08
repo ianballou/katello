@@ -70,7 +70,7 @@ module ::Actions::Katello::Repository
       simplified_acs = katello_alternate_content_sources(:yum_simplified_alternate_content_source)
       simplified_acs.verify_ssl = nil
       simplified_acs.products << repository.product
-      ::Katello::SmartProxyAlternateContentSource.create(alternate_content_source_id: simplified_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_href: 'remote_href', alternate_content_source_href: 'acs_href')
+      ::Katello::SmartProxyAlternateContentSource.create(alternate_content_source_id: simplified_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_prn: 'remote_prn', alternate_content_source_prn: 'acs_prn')
       plan_action action, repository
       assert_action_planned action, acs_create_action_class
     end
@@ -80,7 +80,7 @@ module ::Actions::Katello::Repository
       simplified_acs.verify_ssl = nil
       repository.root.update(url: 'uln://uln-repo.org')
       simplified_acs.products << repository.product
-      ::Katello::SmartProxyAlternateContentSource.create(alternate_content_source_id: simplified_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_href: 'remote_href', alternate_content_source_href: 'acs_href')
+      ::Katello::SmartProxyAlternateContentSource.create(alternate_content_source_id: simplified_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_prn: 'remote_prn', alternate_content_source_prn: 'acs_prn')
       plan_action action, repository
       refute_action_planned action, acs_create_action_class
     end
@@ -506,7 +506,7 @@ module ::Actions::Katello::Repository
     it 'plans' do
       uuids.each do |str|
         docker_repo.docker_manifests.create!(:digest => str) do |manifest|
-          manifest.pulp_id = str
+          manifest.pulp_prn = str
         end
       end
 
@@ -660,7 +660,7 @@ module ::Actions::Katello::Repository
               generate_metadata: true, sync_capsule: true
 
       import_upload_args = {
-        pulp_id: docker_repository.pulp_id,
+        pulp_prn: docker_repository.pulp_prn,
         unit_type_id: 'docker_manifest',
         unit_key: {'size' => '12333', 'checksum' => 'asf23421324', 'name' => 'test'},
         upload_id: 1,
@@ -686,7 +686,7 @@ module ::Actions::Katello::Repository
               generate_metadata: true, sync_capsule: true, content_type: 'docker_tag'
 
       import_upload_args = {
-        pulp_id: docker_repository.pulp_id,
+        pulp_prn: docker_repository.pulp_prn,
         unit_type_id: 'docker_tag',
         unit_key: unit_keys[0],
         upload_id: 1,

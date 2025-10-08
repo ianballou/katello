@@ -42,7 +42,7 @@ module Katello
         when ContentViewFilter::MODULE_STREAM
           module_streams = ModuleStream.where(:id => clauses)
         end
-        {'_id' => { "$in" => module_streams.pluck(:pulp_id)}} unless module_streams.empty?
+        {'_id' => { "$in" => module_streams.pluck(:pulp_prn)}} unless module_streams.empty?
       end
     end
   end

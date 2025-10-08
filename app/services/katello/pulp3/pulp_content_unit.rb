@@ -88,7 +88,7 @@ module Katello
       end
 
       def self.unit_identifier
-        "pulp_href"
+        "prn"
       end
 
       def self.content_type
@@ -121,7 +121,7 @@ module Katello
         repository_version_href = repository.version_href
         page_opts = { "offset" => 0, repository_version: repository_version_href, limit: page_size }
         page_opts[:fields] = self.const_get(:PULP_INDEXED_FIELDS).join(",") if self.constants.include?(:PULP_INDEXED_FIELDS)
-        page_opts[:fields] = 'pulp_href' if fetch_identifiers
+        page_opts[:fields] = 'prn' if fetch_identifiers
         response = {}
         Enumerator.new do |yielder|
           loop do

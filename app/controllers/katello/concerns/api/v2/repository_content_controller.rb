@@ -294,7 +294,7 @@ module Katello
       end
 
       def check_repo_for_content_resource
-        if params[:repository_id] && !@resource.send(repo_association).include?(@repo.pulp_id)
+        if params[:repository_id] && !@resource.send(repo_association).include?(@repo.pulp_prn)
           fail HttpErrors::NotFound, _("Could not find %{content} with id '%{id}' in repository.") %
             { content: resource_name, id: params[:id] }
         end

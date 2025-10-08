@@ -19,13 +19,13 @@ module Katello
     end
 
     def test_create
-      pulp_id = 'dummy-uuid-999'
-      assert Deb.create!(pulp_id: pulp_id, name: 'dummy')
-      assert Deb.find_by_pulp_id(pulp_id)
+      pulp_prn = 'dummy-uuid-999'
+      assert Deb.create!(pulp_id: pulp_prn, name: 'dummy')
+      assert Deb.find_by_pulp_prn(pulp_id)
     end
 
     def test_with_identifiers
-      set = Deb.with_identifiers([@deb_one.id, @deb_two.pulp_id])
+      set = Deb.with_identifiers([@deb_one.id, @deb_two.pulp_prn])
       assert_equal 2, set.size
       assert_includes set, @deb_one
       assert_includes set, @deb_two
@@ -38,7 +38,7 @@ module Katello
         name: name,
         version: version,
         architecture: arch,
-        pulp_id: SecureRandom.uuid,
+        pulp_prn: SecureRandom.uuid,
         filename: "#{name}_#{version}_#{arch}.deb",
         repository_ids: [@repo.id]
       )

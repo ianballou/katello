@@ -4,7 +4,7 @@ module Katello
   class Api::V2::DockerManifestListsControllerTest < ActionController::TestCase
     def models
       @repo = Repository.find(katello_repositories(:redis).id)
-      @manifest_list = @repo.docker_manifest_lists.create!(:digest => "aeeeeeebc123", :pulp_id => "123xyz")
+      @manifest_list = @repo.docker_manifest_lists.create!(:digest => "aeeeeeebc123", :pulp_prn => "123xyz")
     end
 
     def setup
@@ -37,7 +37,7 @@ module Katello
     end
 
     def test_show
-      get :show, params: { :repository_id => @repo.id, :id => @manifest_list.pulp_id }
+      get :show, params: { :repository_id => @repo.id, :id => @manifest_list.pulp_prn }
 
       assert_response :success
       assert_template "katello/api/v2/docker_manifest_lists/show"

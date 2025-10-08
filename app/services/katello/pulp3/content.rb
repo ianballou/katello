@@ -16,19 +16,19 @@ module Katello
             else
               content_list = content_backend_service.content_api.list("sha256": checksum)
             end
-            content_unit_href = content_list.results.first.pulp_href unless content_list.results.empty?
-            return {"content_unit_href" => content_unit_href} if content_unit_href
+            content_unit_prn = content_list.results.first.prn unless content_list.results.empty?
+            return {"content_unit_href" => content_unit_prn} if content_unit_prn
           end
-          upload_href = uploads_api.create(upload_class.new(size: size)).pulp_href
-          {"upload_id" => upload_href.split("/").last}
+          upload_prn = uploads_api.create(upload_class.new(size: size)).prn
+          {"upload_id" => upload_prn.split("/").last}
         end
 
         def delete_upload(upload_href)
           #Commit deletes upload request for pulp3. Not needed other than to implement abstract method.
         end
 
-        def upload_chunk(upload_href, offset, content, size)
-          upload_href = "/pulp/api/v3/uploads/" + upload_href + "/"
+        def upload_chunk(upload_prn, offset, content, size)
+          upload_prn = "/pulp/api/v3/uploads/" + upload_prn + "/"
           offset = offset.try(:to_i)
           size = size.try(:to_i)
           begin
@@ -36,7 +36,7 @@ module Katello
             filechunk.write(content)
             filechunk.flush
             actual_chunk_size = File.size(filechunk)
-            uploads_api.update(content_range(offset, offset + actual_chunk_size - 1, size), upload_href, filechunk)
+            uploads_api.update(content_range(offset, offset + actual_chunk_size - 1, size), upload_prn, filechunk)
           ensure
             filechunk.close
             filechunk.unlink

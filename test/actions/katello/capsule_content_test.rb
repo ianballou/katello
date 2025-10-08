@@ -218,7 +218,7 @@ module ::Actions::Katello::CapsuleContent
       SmartProxy.any_instance.stubs(:pulp3_support?).returns(true)
       with_pulp3_features(capsule_content.smart_proxy)
       capsule_content.smart_proxy.add_lifecycle_environment(dev_environment)
-      repos_in_dev = Katello::Repository.in_environment(dev_environment).pluck(:pulp_id)
+      repos_in_dev = Katello::Repository.in_environment(dev_environment).pluck(:pulp_prn)
 
       tree = plan_action_tree(action_class, capsule_content.smart_proxy, :environment_id => dev_environment.id)
       options = { smart_proxy_id: capsule_content.smart_proxy.id,
@@ -232,20 +232,20 @@ module ::Actions::Katello::CapsuleContent
       assert_tree_planned_with(tree, ::Actions::Pulp3::CapsuleContent::Sync) do |input|
         assert_equal capsule_content.smart_proxy.id, input[:smart_proxy_id]
         repo = Katello::Repository.find(input[:repository_id])
-        assert_includes repos_in_dev, repo.pulp_id
+        assert_includes repos_in_dev, repo.pulp_prn
       end
 
       assert_tree_planned_with(tree, ::Actions::Pulp3::CapsuleContent::GenerateMetadata) do |input|
         assert_equal capsule_content.smart_proxy.id, input[:smart_proxy_id]
         repo = Katello::Repository.find(input[:repository_id])
-        assert_includes repos_in_dev, repo.pulp_id
+        assert_includes repos_in_dev, repo.pulp_prn
       end
 
       assert_tree_planned_with(tree, Actions::Pulp3::CapsuleContent::RefreshDistribution) do |input|
         assert_equal capsule_content.smart_proxy.id, input[:smart_proxy_id]
         repo = Katello::Repository.find(input[:repository_id])
-        assert_includes repos_in_dev, repo.pulp_id
-        repos_in_dev.delete(repo.pulp_id)
+        assert_includes repos_in_dev, repo.pulp_prn
+        repos_in_dev.delete(repo.pulp_prn)
       end
 
       assert_empty repos_in_dev

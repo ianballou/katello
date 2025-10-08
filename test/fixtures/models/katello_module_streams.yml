@@ -4,12 +4,12 @@ river:
   context: buckeye
   stream: noitsariver
   arch: bridge
-  pulp_id: thatriver
+  pulp_prn: thatriver
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
 
 empty:
-  pulp_id: itsempty
+  pulp_prn: itsempty
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
 
@@ -19,7 +19,7 @@ one:
   context: buckeye
   stream: noitsariver
   arch: bridge
-  pulp_id: one
+  pulp_prn: one
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
 
@@ -29,7 +29,7 @@ two:
   context: buckeye
   stream: noitsariver
   arch: bridge
-  pulp_id: two
+  pulp_prn: two
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
 
@@ -39,7 +39,7 @@ three:
   context: buckeye
   stream: noitsariver
   arch: bridge
-  pulp_id: three
+  pulp_prn: three
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
 
@@ -49,6 +49,6 @@ module_stream_four:
   context: buckeye
   stream: noitsariver
   arch: bridge
-  pulp_id: thatriver2
+  pulp_prn: thatriver2
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>

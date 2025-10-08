@@ -3,7 +3,7 @@ module Katello
     class Repository
       class Generic < ::Katello::Pulp3::Repository
         def copy_content_for_source(source_repository, _options = {})
-          copy_units_by_href(source_repository.generic_content_units&.pluck(:pulp_id))
+          copy_units_by_href(source_repository.generic_content_units&.pluck(:pulp_prn))
         end
 
         def distribution_options(path)
@@ -13,9 +13,9 @@ module Katello
           }
 
           if ::Katello::RepositoryTypeManager.find(repo.content_type).pulp3_skip_publication
-            options.merge!(repository_version: repo.version_href)
+            options.merge!(repository_version: repo.version_prn)
           else
-            options.merge!(publication: repo.publication_href)
+            options.merge!(publication: repo.publication_prn)
           end
 
           options

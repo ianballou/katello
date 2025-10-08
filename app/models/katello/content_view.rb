@@ -882,7 +882,7 @@ module Katello
 
       cv_repository_condition = table[:auditable_id].in(cv_repository_ids)
                                                     .and(table[:auditable_type].eq('Katello::Repository'))
-                                                    .and(Arel.sql("(#{audited_changes_like.call("publication_href")} OR #{audited_changes_like.call("version_href")})"))
+                                                    .and(Arel.sql("(#{audited_changes_like.call("publication_prn")} OR #{audited_changes_like.call("version_prn")})"))
 
       content_view_filter_condition = table[:auditable_type].eq('Katello::ContentViewFilter').and(table[:associated_id].eq(id))
 

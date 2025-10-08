@@ -40,7 +40,7 @@ module Katello
       source_repo.errata.destroy_all
       module_stream = katello_module_streams(:river)
       erratum = source_repo.errata.create! do |new_erratum|
-        new_erratum.pulp_id = "foo"
+        new_erratum.pulp_prn = "foo"
         ep1 = ErratumPackage.new(:filename => @rpm_two.filename, :nvrea => 'foo', :name => 'foo')
         ep1.module_streams = [module_stream]
         ep2 = ErratumPackage.new(:filename => @rpm_one.filename, :nvrea => 'foo', :name => 'foo')
@@ -60,7 +60,7 @@ module Katello
       source_repo.errata.destroy_all
 
       erratum = source_repo.errata.create! do |new_erratum|
-        new_erratum.pulp_id = "foo"
+        new_erratum.pulp_prn = "foo"
         ep1 = ErratumPackage.new(:filename => @rpm_two.filename, :nvrea => 'foo', :name => 'foo')
         ep2 = ErratumPackage.new(:filename => @rpm_one.filename, :nvrea => 'foo', :name => 'foo')
         new_erratum.packages = [ep1, ep2]
@@ -88,7 +88,7 @@ module Katello
       source_repo.errata.destroy_all
       module_stream = katello_module_streams(:river)
       erratum = source_repo.errata.create! do |new_erratum|
-        new_erratum.pulp_id = "foo"
+        new_erratum.pulp_prn = "foo"
         ep1 = ErratumPackage.new(:filename => @rpm_two.filename, :nvrea => 'foo', :name => 'foo')
         ep1.module_streams = [module_stream]
         new_erratum.packages = [ep1]
@@ -113,7 +113,7 @@ module Katello
       source_repo.errata.destroy_all
       module_stream = katello_module_streams(:river)
       erratum = source_repo.errata.create! do |new_erratum|
-        new_erratum.pulp_id = "foo"
+        new_erratum.pulp_prn = "foo"
         ep1 = ErratumPackage.new(:filename => @rpm_two.filename, :nvrea => 'foo', :name => 'foo')
         ep1.module_streams = [module_stream]
         new_erratum.packages = [ep1]
@@ -145,7 +145,7 @@ module Katello
       filename = 'much-rpm.much-wow'
 
       erratum = source_repo.errata.create! do |new_erratum|
-        new_erratum.pulp_id = "foo"
+        new_erratum.pulp_prn = "foo"
         new_erratum.packages = [ErratumPackage.new(:filename => filename, :nvrea => 'foo', :name => 'foo')]
       end
 
@@ -155,7 +155,7 @@ module Katello
       assert_includes @fedora_17_x86_64_dev.partial_errata, erratum
 
       rpm = source_repo.rpms.create! do |new_rpm|
-        new_rpm.pulp_id = 'its the pulp_id that never ends oh wait it does'
+        new_rpm.pulp_prn = 'its the pulp_prn that never ends oh wait it does'
         new_rpm.filename = filename
       end
 
@@ -171,7 +171,7 @@ module Katello
       # i.e only a subset of errata packages are present in the destination repo
       filename = 'much-rpm123.rpm'
       new_rpm = source_repo.rpms.create! do |another_rpm|
-        another_rpm.pulp_id = 'its the NEW pulp_id that never ends oh wait it does'
+        another_rpm.pulp_prn = 'its the NEW pulp_prn that never ends oh wait it does'
         another_rpm.filename = filename
       end
 
@@ -193,7 +193,7 @@ module Katello
       filename = 'much-rpm.much-wow'
 
       erratum = source_repo.errata.create! do |new_erratum|
-        new_erratum.pulp_id = "foo"
+        new_erratum.pulp_prn = "foo"
         new_erratum.packages = [ErratumPackage.new(:filename => filename, :nvrea => 'foo', :name => 'foo')]
       end
 
@@ -216,7 +216,7 @@ module Katello
       source_repo.errata.destroy_all
 
       source_repo.errata.create! do |new_erratum|
-        new_erratum.pulp_id = "foo"
+        new_erratum.pulp_prn = "foo"
         ep1 = ErratumPackage.new(:filename => @rpm_two.filename, :nvrea => 'foo', :name => 'foo')
         ep1.module_streams = [module_stream_two]
         new_erratum.packages = [ep1]
@@ -249,16 +249,16 @@ module Katello
       assert_equal 347, repo.relative_path.size
     end
 
-    def test_docker_pulp_id
-      # for docker repos, the pulp_id should be downcased
+    def test_docker_pulp_prn
+      # for docker repos, the pulp_prn should be downcased
       repo = Repository.new(:root => katello_root_repositories(:busybox2_root),
                             :content_view_version => @repo.organization.default_content_view.versions.first,
                             :environment => @repo.organization.library,
                             :relative_path => "/asdfsafdaf")
-      repo.pulp_id = 'PULP-ID'
+      repo.pulp_prn = 'PULP-ID'
       assert repo.save
 
-      assert repo.pulp_id.ends_with?('pulp-id')
+      assert repo.pulp_prn.ends_with?('pulp-id')
     end
 
     def test_primary_link
@@ -312,51 +312,51 @@ module Katello
   end
 
   class RepositoryGeneratedIdsTest < RepositoryTestBase
-    def test_set_pulp_id_library_inst
+    def test_set_pulp_prn_library_inst
       SecureRandom.expects(:uuid).returns('SECURE-UUID')
-      @fedora_17_x86_64.pulp_id = nil
-      @fedora_17_x86_64.set_pulp_id
+      @fedora_17_x86_64.pulp_prn = nil
+      @fedora_17_x86_64.set_pulp_prn
 
-      assert_equal 'SECURE-UUID', @fedora_17_x86_64.pulp_id
+      assert_equal 'SECURE-UUID', @fedora_17_x86_64.pulp_prn
     end
 
-    def test_set_pulp_id_archive
+    def test_set_pulp_prn_archive
       archive_repo = katello_repositories(:fedora_17_x86_64_library_view_1)
-      archive_repo.pulp_id = nil
-      archive_repo.set_pulp_id
+      archive_repo.pulp_prn = nil
+      archive_repo.set_pulp_prn
 
-      assert_equal "#{archive_repo.organization.id}-published_library_view-v1_0-#{archive_repo.library_instance.pulp_id}", archive_repo.pulp_id
+      assert_equal "#{archive_repo.organization.id}-published_library_view-v1_0-#{archive_repo.library_instance.pulp_prn}", archive_repo.pulp_prn
     end
 
-    def test_set_pulp_id_cv_le
-      @fedora_17_dev_library_view.pulp_id = nil
-      @fedora_17_dev_library_view.set_pulp_id
+    def test_set_pulp_prn_cv_le
+      @fedora_17_dev_library_view.pulp_prn = nil
+      @fedora_17_dev_library_view.set_pulp_prn
 
-      assert_equal "#{@fedora_17_dev_library_view.organization.id}-published_library_view-dev_label-#{@fedora_17_dev_library_view.library_instance.pulp_id}",
-                   @fedora_17_dev_library_view.pulp_id
+      assert_equal "#{@fedora_17_dev_library_view.organization.id}-published_library_view-dev_label-#{@fedora_17_dev_library_view.library_instance.pulp_prn}",
+                   @fedora_17_dev_library_view.pulp_prn
     end
 
-    def test_set_pulp_id_max_chars
+    def test_set_pulp_prn_max_chars
       SecureRandom.expects(:uuid).returns('SECURE-UUID')
 
-      @fedora_17_dev_library_view.pulp_id = nil
+      @fedora_17_dev_library_view.pulp_prn = nil
       @fedora_17_dev_library_view.content_view.update_column(:label, 'a' * 120)
       @fedora_17_dev_library_view.environment.update_column(:label, 'b' * 120)
-      @fedora_17_dev_library_view.set_pulp_id
+      @fedora_17_dev_library_view.set_pulp_prn
 
-      assert_equal 'SECURE-UUID', @fedora_17_dev_library_view.pulp_id
+      assert_equal 'SECURE-UUID', @fedora_17_dev_library_view.pulp_prn
     end
 
-    def test_set_pulp_id_no_overwrite
-      id = @fedora_17_x86_64.pulp_id
-      @fedora_17_x86_64.set_pulp_id
-      assert_equal id, @fedora_17_x86_64.pulp_id
+    def test_set_pulp_prn_no_overwrite
+      id = @fedora_17_x86_64.pulp_prn
+      @fedora_17_x86_64.set_pulp_prn
+      assert_equal id, @fedora_17_x86_64.pulp_prn
     end
 
-    def test_set_pulp_id_save
-      @fedora_17_x86_64.pulp_id = nil
+    def test_set_pulp_prn_save
+      @fedora_17_x86_64.pulp_prn = nil
       @fedora_17_x86_64.save!
-      refute_nil @fedora_17_x86_64.pulp_id
+      refute_nil @fedora_17_x86_64.pulp_prn
     end
 
     def test_set_container_repository_name
@@ -593,12 +593,12 @@ module Katello
     def test_units_for_removal_yum
       rpms = @fedora_17_x86_64.rpms.sample(2)
       rpm_ids = rpms.map(&:id).sort
-      rpm_uuids = rpms.map(&:pulp_id).sort
+      rpm_uuids = rpms.map(&:pulp_prn).sort
 
       refute_empty rpms
       assert_equal rpm_ids, @fedora_17_x86_64.units_for_removal(rpm_ids).map(&:id).sort
       assert_equal rpm_ids, @fedora_17_x86_64.units_for_removal(rpm_ids.map(&:to_s)).map(&:id).sort
-      assert_equal rpm_uuids, @fedora_17_x86_64.units_for_removal(rpm_uuids).map(&:pulp_id).sort
+      assert_equal rpm_uuids, @fedora_17_x86_64.units_for_removal(rpm_uuids).map(&:pulp_prn).sort
     end
 
     def test_packages_without_errata
@@ -606,7 +606,7 @@ module Katello
       errata_rpm = rpms[0]
       non_errata_rpm = rpms[1]
       @fedora_17_x86_64.errata.create! do |erratum|
-        erratum.pulp_id = "foo"
+        erratum.pulp_prn = "foo"
         erratum.packages = [ErratumPackage.new(:filename => errata_rpm.filename, :nvrea => 'foo', :name => 'foo')]
       end
 
@@ -624,7 +624,7 @@ module Katello
 
     def test_units_for_removal_docker
       ['one', 'two', 'three'].each do |str|
-        @redis.docker_manifests.create!(:digest => str, :pulp_id => "pulpid-#{str}")
+        @redis.docker_manifests.create!(:digest => str, :pulp_prn => "pulpid-#{str}")
       end
 
       manifests = @redis.docker_manifests.sample(2).sort_by { |obj| obj.id }
@@ -695,7 +695,7 @@ module Katello
       new_custom_repo.stubs(:label_not_changed).returns(true)
       new_custom_repo.name = "new_custom_repo"
       new_custom_repo.label = "new_custom_repo"
-      new_custom_repo.pulp_id = "new_custom_repo"
+      new_custom_repo.pulp_prn = "new_custom_repo"
       new_custom_repo
     end
 
@@ -753,9 +753,9 @@ module Katello
     def test_repository_smart_proxy_syncable
       view = katello_content_views(:library_view)
       repo = view.versions.map(&:repositories).flatten.find { |repository| repository.yum? && !repository.environment_id.nil? }
-      assert_includes ::Katello::Repository.smart_proxy_syncable.map(&:pulp_id), repo.pulp_id
+      assert_includes ::Katello::Repository.smart_proxy_syncable.map(&:pulp_prn), repo.pulp_prn
       view.generated_for_repository_export!
-      refute_includes ::Katello::Repository.smart_proxy_syncable.map(&:pulp_id), repo.pulp_id
+      refute_includes ::Katello::Repository.smart_proxy_syncable.map(&:pulp_prn), repo.pulp_prn
     end
   end
 end

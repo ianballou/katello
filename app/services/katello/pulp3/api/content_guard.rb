@@ -31,21 +31,21 @@ module Katello
         def refresh
           found = list(name: default_name).results.first
           if found && found.ca_certificate != ca_cert
-            partial_update(found.pulp_href)
+            partial_update(found.prn)
           else
             found = create
           end
-          persist_if_needed(found.pulp_href)
+          persist_if_needed(found.prn)
         end
 
-        def persist_if_needed(href)
+        def persist_if_needed(prn)
           return if self.smart_proxy.pulp_mirror?
           Katello::Util::Support.active_record_retry do
             found = Katello::Pulp3::ContentGuard.find_by(:name => default_name)
             if found
-              found.update(pulp_href: href)
+              found.update(pulp_prn: prn)
             else
-              Katello::Pulp3::ContentGuard.create(name: default_name, pulp_href: href)
+              Katello::Pulp3::ContentGuard.create(name: default_name, pulp_prn: prn)
             end
           end
         end
@@ -65,13 +65,13 @@ module Katello
           rhsm_api_client.list options
         end
 
-        def partial_update(href)
+        def partial_update(prn)
           data = { ca_certificate: ca_cert }
-          rhsm_api_client.partial_update(href, data)
+          rhsm_api_client.partial_update(prn, data)
         end
 
-        def delete(href)
-          rhsm_api_client.delete(href) if href
+        def delete(prn)
+          rhsm_api_client.delete(prn) if prn
         end
       end
     end

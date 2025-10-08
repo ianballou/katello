@@ -2,8 +2,8 @@ object @resource
 
 attributes :id
 attributes :name
-attributes :pulp_id
-attributes :pulp_id => :uuid
+attributes :pulp_prn => :pulp_id
+attributes :pulp_prn => :uuid
 attributes :description
 
 node :repository do |package_group|

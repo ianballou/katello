@@ -29,7 +29,7 @@ module Katello
 
         def destroy_importer(importer_href)
           import_data = fetch_import(importer_href)
-          api.import_api.delete(import_data.pulp_href) unless import_data.blank?
+          api.import_api.delete(import_data.prn) unless import_data.blank?
           api.importer_api.delete(importer_href)
         end
 

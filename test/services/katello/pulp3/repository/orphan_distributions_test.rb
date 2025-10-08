@@ -21,7 +21,7 @@ module Katello
         dist = PulpFileClient::FileFileDistribution.new(
           publication: 'http://some.href',
           name: 'name')
-        @repo.update pulp_id: 'name'
+        @repo.update pulp_prn: 'name'
         refute Katello::Pulp3::SmartProxyMirrorRepository.orphan_distribution?(dist)
       end
 
@@ -36,7 +36,7 @@ module Katello
           repository: 'http://some.href',
           repository_version: 'http://some.href/version/',
           name: 'name')
-        @repo.update pulp_id: 'name'
+        @repo.update pulp_prn: 'name'
         refute Katello::Pulp3::SmartProxyMirrorRepository.orphan_distribution?(dist)
       end
 

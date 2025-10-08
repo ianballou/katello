@@ -16,9 +16,9 @@ module Katello
     end
 
     def test_create
-      pulp_id = 'foo'
-      assert FileUnit.create!(:pulp_id => pulp_id)
-      assert FileUnit.find_by_pulp_id(pulp_id)
+      pulp_prn = 'foo'
+      assert FileUnit.create!(:pulp_prn => pulp_prn)
+      assert FileUnit.find_by_pulp_prn(pulp_id)
     end
 
     def test_with_identifiers_single
@@ -26,7 +26,7 @@ module Katello
     end
 
     def test_with_multiple
-      files = FileUnit.with_identifiers([@file_one.id, @file_two.pulp_id])
+      files = FileUnit.with_identifiers([@file_one.id, @file_two.pulp_prn])
 
       assert_equal 2, files.count
       assert_include files, @file_one
@@ -36,12 +36,12 @@ module Katello
     def test_with_identifiers
       assert_includes FileUnit.with_identifiers(@file_one.id), @file_one
       assert_includes FileUnit.with_identifiers([@file_one.id]), @file_one
-      assert_includes FileUnit.with_identifiers(@file_one.pulp_id), @file_one
+      assert_includes FileUnit.with_identifiers(@file_one.pulp_prn), @file_one
     end
 
     def test_large_query
-      ids = ['href'] * 70_000 + [@file_one.pulp_id]
-      assert_equal 1, FileUnit.with_pulp_id(ids).count
+      ids = ['href'] * 70_000 + [@file_one.pulp_prn]
+      assert_equal 1, FileUnit.with_pulp_prn(ids).count
     end
 
     def test_large_sync_repository_association
@@ -51,7 +51,7 @@ module Katello
         ids_href_map["href#{i}"] = nil
         i += 1
       end
-      Katello::FileUnit.import([:pulp_id], ids, validate: false)
+      Katello::FileUnit.import([:pulp_prn], ids, validate: false)
 
       content_type = Katello::RepositoryTypeManager.find_content_type('file')
       service_class = content_type.pulp3_service_class

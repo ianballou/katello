@@ -28,22 +28,22 @@ module ::Actions::Pulp3
     end
 
     def teardown
-      @yum_acs.smart_proxy_alternate_content_sources.where.not(remote_href: nil).sort_by(&:remote_href).each do |smart_proxy_acs|
+      @yum_acs.smart_proxy_alternate_content_sources.where.not(remote_prn: nil).sort_by(&:remote_prn).each do |smart_proxy_acs|
         ForemanTasks.sync_task(
             ::Actions::Pulp3::Orchestration::AlternateContentSource::Delete, smart_proxy_acs)
       end
 
-      @file_acs.smart_proxy_alternate_content_sources.where.not(remote_href: nil).sort_by(&:remote_href).each do |smart_proxy_acs|
+      @file_acs.smart_proxy_alternate_content_sources.where.not(remote_prn: nil).sort_by(&:remote_prn).each do |smart_proxy_acs|
         ForemanTasks.sync_task(
             ::Actions::Pulp3::Orchestration::AlternateContentSource::Delete, smart_proxy_acs)
       end
 
-      @yum_simplified_acs.smart_proxy_alternate_content_sources.where.not(remote_href: nil).sort_by(&:remote_href).each do |smart_proxy_acs|
+      @yum_simplified_acs.smart_proxy_alternate_content_sources.where.not(remote_prn: nil).sort_by(&:remote_prn).each do |smart_proxy_acs|
         ForemanTasks.sync_task(
             ::Actions::Pulp3::Orchestration::AlternateContentSource::Delete, smart_proxy_acs)
       end
 
-      @file_simplified_acs.smart_proxy_alternate_content_sources.where.not(remote_href: nil).sort_by(&:remote_href).each do |smart_proxy_acs|
+      @file_simplified_acs.smart_proxy_alternate_content_sources.where.not(remote_prn: nil).sort_by(&:remote_prn).each do |smart_proxy_acs|
         ForemanTasks.sync_task(
             ::Actions::Pulp3::Orchestration::AlternateContentSource::Delete, smart_proxy_acs)
       end

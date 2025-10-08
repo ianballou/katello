@@ -65,7 +65,7 @@ module Katello
 
     def test_smart_proxies
       assert @yum_acs.save
-      SmartProxyAlternateContentSource.create(alternate_content_source_id: @yum_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_href: 'remote_href', alternate_content_source_href: 'acs_href')
+      SmartProxyAlternateContentSource.create(alternate_content_source_id: @yum_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_prn: 'remote_prn', alternate_content_source_prn: 'acs_prn')
       @yum_acs.reload
       assert_equal @yum_acs.smart_proxies, [::SmartProxy.pulp_primary]
     end
@@ -146,13 +146,13 @@ module Katello
     def setup
       @yum_acs = katello_alternate_content_sources(:yum_alternate_content_source)
       @yum_acs.subpaths = ['rpms/', 'packages/']
-      SmartProxyAlternateContentSource.create(alternate_content_source_id: @yum_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_href: 'remote_href', alternate_content_source_href: 'acs_href')
+      SmartProxyAlternateContentSource.create(alternate_content_source_id: @yum_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_prn: 'remote_prn', alternate_content_source_prn: 'acs_prn')
       @yum_acs.save
       @yum_acs.reload
 
       @file_acs = katello_alternate_content_sources(:file_alternate_content_source)
       @file_acs.subpaths = ['files/', 'selif/']
-      SmartProxyAlternateContentSource.create(alternate_content_source_id: @file_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_href: 'remote_href2', alternate_content_source_href: 'acs_href2')
+      SmartProxyAlternateContentSource.create(alternate_content_source_id: @file_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_prn: 'remote_prn2', alternate_content_source_prn: 'acs_prn2')
       @file_acs.save
       @file_acs.reload
 
@@ -160,8 +160,8 @@ module Katello
       @repo1 = ::Katello::Repository.find_by(relative_path: 'ACME_Corporation/library/fedora_17_label_no_arch')
       @repo2 = ::Katello::Repository.find_by(relative_path: 'ACME_Corporation/library/fedora_17_label')
       @simplified_acs.products << @repo1.product
-      SmartProxyAlternateContentSource.create(alternate_content_source_id: @simplified_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_href: 'remote_href2', alternate_content_source_href: 'acs_href2', repository_id: @repo1.id)
-      SmartProxyAlternateContentSource.create(alternate_content_source_id: @simplified_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_href: 'remote_href2', alternate_content_source_href: 'acs_href2', repository_id: @repo2.id)
+      SmartProxyAlternateContentSource.create(alternate_content_source_id: @simplified_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_prn: 'remote_prn2', alternate_content_source_prn: 'acs_prn2', repository_id: @repo1.id)
+      SmartProxyAlternateContentSource.create(alternate_content_source_id: @simplified_acs.id, smart_proxy_id: ::SmartProxy.pulp_primary.id, remote_prn: 'remote_prn2', alternate_content_source_prn: 'acs_prn2', repository_id: @repo2.id)
       @simplified_acs.save
       @simplified_acs.reload
 

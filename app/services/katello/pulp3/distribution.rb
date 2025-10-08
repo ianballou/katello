@@ -10,7 +10,7 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::Yum.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
     end
   end

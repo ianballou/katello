@@ -11,17 +11,17 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::AnsibleCollection.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
-      def self.pulp_data(_pulp_href)
+      def self.pulp_data(_pulp_prn)
         #No content read method
         fail NotImplementedError
       end
 
       def self.generate_model_row(unit)
         {
-          pulp_id: unit['pulp_href'],
+          pulp_prn: unit['prn'],
           checksum: unit['sha256'],
           namespace: unit['namespace'],
           version: unit['version'],
@@ -30,11 +30,11 @@ module Katello
         }
       end
 
-      def self.insert_child_associations(units, pulp_id_to_id)
+      def self.insert_child_associations(units, pulp_prn_to_id)
         insert_tags units
         collection_tag_rows = []
         units.each do |unit|
-          katello_id = pulp_id_to_id[unit['pulp_href']]
+          katello_id = pulp_prn_to_id[unit['prn']]
           #delete old tags
           unit_tags = unit['tags']&.map { |tag| tag[:name] }
           Katello::AnsibleCollectionTag.where(:ansible_collection_id => katello_id).where.not(:ansible_tag_id => Katello::AnsibleTag.where(:name => unit_tags)).delete_all

@@ -213,7 +213,7 @@ module Katello
     def test_index_with_erratum_id
       ids = @errata.repositories.in_content_views([@organization.default_content_view]).pluck(:id)
 
-      response = get :index, params: { :erratum_id => @errata.pulp_id, :organization_id => @organization.id }
+      response = get :index, params: { :erratum_id => @errata.pulp_prn, :organization_id => @organization.id }
 
       assert_response :success
       assert_template 'api/v2/repositories/index'
@@ -757,7 +757,7 @@ module Katello
       @controller.expects(:sync_task).with(::Actions::Katello::Repository::RemoveContent,
                                            @repository, [@rpm], content_type: nil, sync_capsule: true).once.returns(::ForemanTasks::Task::DynflowTask.new)
 
-      put :remove_content, params: { :id => @repository.id, :ids => [@rpm.pulp_id] }
+      put :remove_content, params: { :id => @repository.id, :ids => [@rpm.pulp_prn] }
 
       assert_response :success
     end
@@ -777,7 +777,7 @@ module Katello
       @controller.expects(:sync_task).with(::Actions::Katello::Repository::RemoveContent,
                                            @repository, [@rpm], content_type: nil, sync_capsule: true).never
 
-      put :remove_content, params: { :id => @repository.id, :ids => [@rpm.pulp_id], :content_type => 'cheese' }
+      put :remove_content, params: { :id => @repository.id, :ids => [@rpm.pulp_prn], :content_type => 'cheese' }
 
       assert_response 400
       assert_match "{\"displayMessage\":\"Content type cheese is incompatible with repositories of type yum\",\"errors\":[\"Content type cheese is incompatible with repositories of type yum\"]}",

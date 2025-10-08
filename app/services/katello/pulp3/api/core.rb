@@ -47,7 +47,7 @@ module Katello
           fail NotImplementedError
         end
 
-        # Method is called with either :url or :href parameters for the sake of yum content.
+        # Method is called with either :url or :prn parameters for the sake of yum content.
         def get_remotes_api(*)
           remotes_api
         end
@@ -192,27 +192,27 @@ module Katello
           [orphans_api.cleanup(PulpcoreClient::OrphansCleanup.new(orphan_protection_time: (smart_proxy.pulp_mirror? ? 0 : Setting[:orphan_protection_time])))]
         end
 
-        def delete_remote(remote_href)
-          ignore_404_exception { remotes_api.delete(remote_href) }
+        def delete_remote(remote_prn)
+          ignore_404_exception { remotes_api.delete(remote_prn) }
         end
 
-        def repository_version_hrefs(options = {})
-          repository_versions(options).map(&:pulp_href).uniq
+        def repository_version_prns(options = {})
+          repository_versions(options).map(&:prn).uniq
         end
 
         def repository_versions(options = {})
           current_pulp_repositories = self.list_all(options)
-          repo_hrefs = current_pulp_repositories.collect { |repo| repo.pulp_href }.uniq
+          repo_prns = current_pulp_repositories.collect { |repo| repo.prn }.uniq
 
-          version_hrefs = repo_hrefs.collect do |href|
-            versions_list_for_repository(href, options)
+          version_prns = repo_prns.collect do |prn|
+            versions_list_for_repository(prn, options)
           end
 
-          version_hrefs.flatten
+          version_prns.flatten
         end
 
-        def versions_list_for_repository(repository_href, options)
-          self.class.fetch_from_list { |page_opts| repository_versions_api.list(repository_href, page_opts.merge(options)) }
+        def versions_list_for_repository(repository_prn, options)
+          self.class.fetch_from_list { |page_opts| repository_versions_api.list(repository_prn, page_opts.merge(options)) }
         end
 
         def publications_list_all(args = {})
@@ -227,12 +227,12 @@ module Katello
           end
         end
 
-        def get_distribution(href)
-          ignore_404_exception { distributions_api.read(href) }
+        def get_distribution(prn)
+          ignore_404_exception { distributions_api.read(prn) }
         end
 
-        def delete_distribution(href)
-          ignore_404_exception { distributions_api.delete(href) }
+        def delete_distribution(prn)
+          ignore_404_exception { distributions_api.delete(prn) }
         end
 
         def core_repositories_list_all(options = {})

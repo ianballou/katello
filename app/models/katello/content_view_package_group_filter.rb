@@ -13,10 +13,10 @@ module Katello
     end
 
     def content_unit_pulp_ids(repo)
-      package_group_hrefs = package_group_rules.reject { |rule| rule.uuid.blank? }.flat_map.map(&:uuid)
+      package_group_prns = package_group_rules.reject { |rule| rule.uuid.blank? }.flat_map.map(&:uuid)
       package_group_names = repo.package_groups.
-        where(:pulp_id => package_group_hrefs).collect { |package_group| package_group.package_names }.flatten.uniq
-      repo.rpms.where(:name => package_group_names).pluck(:pulp_id).compact
+        where(:pulp_prn => package_group_prns).collect { |package_group| package_group.package_names }.flatten.uniq
+      repo.rpms.where(:name => package_group_names).pluck(:pulp_prn).compact
     end
   end
 end

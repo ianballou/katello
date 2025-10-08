@@ -30,10 +30,10 @@ module Katello
         module_ids.concat(repo.module_streams_without_errata.map(&:id))
       end
       modules_streams = ModuleStream.in_repositories(repo).where(id: module_ids).includes(:rpms)
-      content_unit_ids += modules_streams.pluck(:pulp_id).flatten.uniq
+      content_unit_ids += modules_streams.pluck(:pulp_prn).flatten.uniq
       if dependents && !modules_streams.empty?
         rpms = modules_streams.map(&:rpms).flatten
-        content_unit_ids += rpms.pluck(:pulp_id).flatten.uniq
+        content_unit_ids += rpms.pluck(:pulp_prn).flatten.uniq
       end
       content_unit_ids.uniq
     end

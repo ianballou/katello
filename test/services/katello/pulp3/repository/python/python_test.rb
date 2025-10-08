@@ -60,7 +60,7 @@ module Katello
 
             assert_equal unit.content_type, "python_package"
             assert_includes unit.filename, "shelf_reader"
-            refute unit.pulp_id.nil? && unit.version.nil?
+            refute unit.pulp_prn.nil? && unit.version.nil?
             assert unit.additional_metadata['package_type'] && unit.additional_metadata['sha256']
 
             assert_equal post_unit_count, 2

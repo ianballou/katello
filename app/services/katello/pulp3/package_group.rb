@@ -10,7 +10,7 @@ module Katello
                     :initializer => :backend_data
 
       def _id
-        backend_data['pulp_href']
+        backend_data['prn']
       end
 
       # Package type is now an integer:
@@ -52,12 +52,12 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::Yum.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
       def self.generate_model_row(unit)
         custom_json = {}
-        custom_json['pulp_id'] = unit['pulp_href']
+        custom_json['pulp_prn'] = unit['prn']
         custom_json['name'] = unit['name']
         custom_json['description'] = unit['description']
         custom_json

@@ -17,7 +17,7 @@ module Actions
             smart_proxy: smart_proxy,
             path: input[:path],
             metadata_map: metadata_map
-          ).create_import(input[:importer_data][:pulp_href])
+          ).create_import(input[:importer_data][:importer_prn])
         end
 
         def rescue_strategy_for_self

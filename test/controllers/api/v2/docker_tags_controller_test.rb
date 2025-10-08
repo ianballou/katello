@@ -4,8 +4,8 @@ module Katello
   class Api::V2::DockerTagsControllerTest < ActionController::TestCase
     def models
       @repo = Repository.find(katello_repositories(:redis).id)
-      @manifest = @repo.docker_manifests.create!(:digest => "abc123", :pulp_id => "123xyz")
-      @tag = @repo.docker_tags.create!(:name => "wat", :docker_taggable => @manifest, :pulp_id => 'randompulpid')
+      @manifest = @repo.docker_manifests.create!(:digest => "abc123", :pulp_prn => "123xyz")
+      @tag = @repo.docker_tags.create!(:name => "wat", :docker_taggable => @manifest, :pulp_prn => 'randompulpid')
       @meta_tag = DockerMetaTag.create!(:name => @tag.name, :schema1 => @tag, :repositories => [@repo])
     end
 

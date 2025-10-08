@@ -16,7 +16,7 @@ module Actions
       action.expects(:action_subject).with(repo)
       plan_action(action, repo, [upload])
       import_upload_args = {
-        pulp_id: repo.pulp_id,
+        pulp_prn: repo.pulp_prn,
         unit_type_id: repo.repository_type.default_managed_content_type.content_type,
         unit_key: upload.except('id'),
         upload_id: '1',

@@ -2,11 +2,11 @@ module Katello
   module Util
     module PulpcoreContentFilters
       def filter_distribution_trees_by_pulp_hrefs(distributiontree_results, _content_pulp_hrefs)
-        distributiontree_results.collect { |result| result.pulp_href }.flatten.uniq
+        distributiontree_results.collect { |result| result.prn }.flatten.uniq
       end
 
       def filter_package_groups_by_pulp_href(package_groups, package_pulp_hrefs)
-        rpms = Katello::Rpm.where(:pulp_id => package_pulp_hrefs)
+        rpms = Katello::Rpm.where(:pulp_prn => package_pulp_hrefs)
         package_groups.reject do |package_group|
           #copy the package group as long as we have 1 package from the group
           package_group.package_names.empty? ||
@@ -19,7 +19,7 @@ module Katello
 
         packageenvironment_results.each do |result|
           if (result.packagegroups & package_pulp_hrefs).any?
-            matching_package_env_groups << result.pulp_href
+            matching_package_env_groups << result.prn
           end
         end
 
@@ -27,7 +27,7 @@ module Katello
       end
 
       def filter_metadatafiles_by_pulp_hrefs(metadatafiles_results, _package_pulp_hrefs)
-        metadatafiles_results.collect { |result| result.pulp_href }.flatten.uniq
+        metadatafiles_results.collect { |result| result.prn }.flatten.uniq
       end
     end
   end

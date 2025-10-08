@@ -11,7 +11,7 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::Docker.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
       def self.page_options(page_opts = {})
@@ -28,7 +28,7 @@ module Katello
         {
           schema_version: unit['schema_version'],
           digest: unit['digest'],
-          pulp_id: unit[unit_identifier],
+          pulp_prn: unit[unit_identifier],
           annotations: unit['annotations'],
           labels: unit['labels'],
           is_bootable: unit['is_bootable'] || unit['type'] == 'bootable',
@@ -37,11 +37,11 @@ module Katello
         }
       end
 
-      def self.insert_child_associations(units, pulp_id_to_id)
+      def self.insert_child_associations(units, pulp_prn_to_id)
         manifest_list_manifests = []
         units.each do |unit|
-          katello_id = pulp_id_to_id[unit[unit_identifier]]
-          manifest_ids = ::Katello::DockerManifest.where(:pulp_id => unit[:listed_manifests]).pluck(:id)
+          katello_id = pulp_prn_to_id[unit[unit_identifier]]
+          manifest_ids = ::Katello::DockerManifest.where(:pulp_prn => unit[:listed_manifests]).pluck(:id)
           manifest_list_manifests += manifest_ids.map do |manifest_id|
             {
               docker_manifest_list_id: katello_id,

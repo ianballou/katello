@@ -27,8 +27,8 @@ module Katello
       refute_empty clauses["_id"]
       refute_empty clauses["_id"]["$in"]
       assert_equal 2, clauses["_id"]["$in"].size
-      assert_includes clauses["_id"]["$in"], schema1.pulp_id
-      assert_includes clauses["_id"]["$in"], schema2.pulp_id
+      assert_includes clauses["_id"]["$in"], schema1.pulp_prn
+      assert_includes clauses["_id"]["$in"], schema2.pulp_prn
     end
 
     def test_repo_clause_with_manifest_lists
@@ -51,8 +51,8 @@ module Katello
       refute_empty clauses["_id"]
       refute_empty clauses["_id"]["$in"]
       assert_equal 2, clauses["_id"]["$in"].size
-      assert_includes clauses["_id"]["$in"], schema1.pulp_id
-      assert_includes clauses["_id"]["$in"], schema2.pulp_id
+      assert_includes clauses["_id"]["$in"], schema1.pulp_prn
+      assert_includes clauses["_id"]["$in"], schema2.pulp_prn
     end
 
     # rubocop:disable Metrics/MethodLength
@@ -111,7 +111,7 @@ module Katello
 
       refute_empty clauses
       assert_equal 1, clauses["_id"]["$in"].size
-      assert_equal clauses["_id"]["$in"], [schema_goo_repo1.pulp_id]
+      assert_equal clauses["_id"]["$in"], [schema_goo_repo1.pulp_prn]
 
       # now search for goo in repo2
       # it should be nil

@@ -82,12 +82,12 @@ module Katello
         filter.generate_clauses(@repo).to_sql
     end
 
-    def test_content_unit_pulp_ids_with_empty_errata_list_returns_empty_result
+    def test_content_unit_pulp_prns_with_empty_errata_list_returns_empty_result
       rpm1 = @repo.rpms.first
       rpm2 = @repo.rpms.last
-      erratum1 = Katello::Erratum.new(:pulp_id => "one", :errata_id => "ERRATA1")
+      erratum1 = Katello::Erratum.new(:pulp_prn => "one", :errata_id => "ERRATA1")
       erratum1.packages << Katello::ErratumPackage.new(:filename => rpm1.filename, :name => "e1", :nvrea => "e1")
-      erratum2 = Katello::Erratum.new(:pulp_id => "two", :errata_id => "ERRATA2")
+      erratum2 = Katello::Erratum.new(:pulp_prn => "two", :errata_id => "ERRATA2")
       erratum2.packages << Katello::ErratumPackage.new(:filename => rpm2.filename, :name => "e2", :nvrea => "e2")
 
       @repo.errata = [erratum1, erratum2]
@@ -95,15 +95,15 @@ module Katello
 
       filter = ContentViewErratumFilter.new
 
-      assert_empty filter.content_unit_pulp_ids(@repo)
+      assert_empty filter.content_unit_pulp_prns(@repo)
     end
 
-    def test_content_unit_pulp_ids_by_errata_id_returns_errata_package_pulp_hrefs
+    def test_content_unit_pulp_prns_by_errata_id_returns_errata_package_pulp_hrefs
       rpm1 = @repo.rpms.first
       rpm2 = @repo.rpms.last
-      erratum1 = Katello::Erratum.new(:pulp_id => "one", :errata_id => "ERRATA1")
+      erratum1 = Katello::Erratum.new(:pulp_prn => "one", :errata_id => "ERRATA1")
       erratum1.packages << Katello::ErratumPackage.new(:filename => rpm1.filename, :name => "e1", :nvrea => "e1")
-      erratum2 = Katello::Erratum.new(:pulp_id => "two", :errata_id => "ERRATA2")
+      erratum2 = Katello::Erratum.new(:pulp_prn => "two", :errata_id => "ERRATA2")
       erratum2.packages << Katello::ErratumPackage.new(:filename => rpm2.filename, :name => "e2", :nvrea => "e2")
 
       @repo.errata = [erratum1, erratum2]
@@ -113,10 +113,10 @@ module Katello
       filter = id_rule.filter
       filter.reload
 
-      assert_equal [rpm1.pulp_id], filter.content_unit_pulp_ids(@repo)
+      assert_equal [rpm1.pulp_prn], filter.content_unit_pulp_prns(@repo)
     end
 
-    def test_content_unit_pulp_ids_by_errata_id_does_not_return_protected_errata_content
+    def test_content_unit_pulp_prns_by_errata_id_does_not_return_protected_errata_content
       rpm1 = @repo.rpms.find_by(pulp_id: 'one-uuid')
       rpm2 = @repo.rpms.find_by(pulp_id: 'two-uuid')
       modular_rpm = @repo.rpms.find_by(pulp_id: 'modular')
@@ -125,7 +125,7 @@ module Katello
       erratum2 = Katello::Erratum.create(pulp_id: "two", errata_id: "ERRATA2")
       modular_erratum_package = Katello::ErratumPackage.create(filename: modular_rpm.filename, name: "e2", nvrea: "e2", erratum_id: erratum2.id)
       erratum2.packages << Katello::ErratumPackage.new(filename: rpm2.filename, name: "e2-2", nvrea: "e2-2")
-      module_stream = ::Katello::ModuleStream.create(name: 'mock', pulp_id: 'mock-module', version: '8050020220115095224', context: 'c5368500', stream: 'av', arch: modular_rpm.arch)
+      module_stream = ::Katello::ModuleStream.create(name: 'mock', pulp_prn: 'mock-module', version: '8050020220115095224', context: 'c5368500', stream: 'av', arch: modular_rpm.arch)
       ::Katello::ModuleStreamErratumPackage.create(module_stream_id: module_stream.id, erratum_package_id: modular_erratum_package.id)
 
       @repo.module_streams << module_stream
@@ -137,16 +137,16 @@ module Katello
       FactoryBot.create(:katello_content_view_erratum_filter_rule, errata_id: erratum2.errata_id, content_view_filter_id: filter.id)
       filter.reload
 
-      assert_equal [modular_rpm.pulp_id, rpm2.pulp_id, module_stream.pulp_id].sort, filter.content_unit_pulp_ids(@repo, [erratum1]).sort
+      assert_equal [modular_rpm.pulp_prn, rpm2.pulp_prn, module_stream.pulp_prn].sort, filter.content_unit_pulp_prns(@repo, [erratum1]).sort
     end
 
-    def test_content_unit_pulp_ids_by_updated_start_date_returns_pulp_hrefs
+    def test_content_unit_pulp_prns_by_updated_start_date_returns_pulp_hrefs
       rpm1 = @repo.rpms.first
       rpm2 = @repo.rpms.last
-      erratum1 = Katello::Erratum.new(:pulp_id => "one", :errata_id => "ERRATA1", :updated => "2018-01-01",
+      erratum1 = Katello::Erratum.new(:pulp_prn => "one", :errata_id => "ERRATA1", :updated => "2018-01-01",
                                       :errata_type => 'bugfix')
       erratum1.packages << Katello::ErratumPackage.new(:filename => rpm1.filename, :name => "e1", :nvrea => "e1")
-      erratum2 = Katello::Erratum.new(:pulp_id => "two", :errata_id => "ERRATA2", :updated => "2019-06-01",
+      erratum2 = Katello::Erratum.new(:pulp_prn => "two", :errata_id => "ERRATA2", :updated => "2019-06-01",
                                       :errata_type => 'security')
       erratum2.packages << Katello::ErratumPackage.new(:filename => rpm2.filename, :name => "e2", :nvrea => "e2")
 
@@ -157,16 +157,16 @@ module Katello
       filter = id_rule.filter
       filter.reload
 
-      assert_equal [rpm2.pulp_id], filter.content_unit_pulp_ids(@repo)
+      assert_equal [rpm2.pulp_prn], filter.content_unit_pulp_prns(@repo)
     end
 
-    def test_content_unit_pulp_ids_by_issued_start_date_returns_pulp_hrefs
+    def test_content_unit_pulp_prns_by_issued_start_date_returns_pulp_hrefs
       rpm1 = @repo.rpms.first
       rpm2 = @repo.rpms.last
-      erratum1 = Katello::Erratum.new(:pulp_id => "one", :errata_id => "ERRATA1", :issued => "2018-01-01",
+      erratum1 = Katello::Erratum.new(:pulp_prn => "one", :errata_id => "ERRATA1", :issued => "2018-01-01",
                                       :errata_type => 'security')
       erratum1.packages << Katello::ErratumPackage.new(:filename => rpm1.filename, :name => "e1", :nvrea => "e1")
-      erratum2 = Katello::Erratum.new(:pulp_id => "two", :errata_id => "ERRATA2", :issued => "2019-06-01",
+      erratum2 = Katello::Erratum.new(:pulp_prn => "two", :errata_id => "ERRATA2", :issued => "2019-06-01",
                                       :errata_type => 'enhancement')
       erratum2.packages << Katello::ErratumPackage.new(:filename => rpm2.filename, :name => "e2", :nvrea => "e2")
 
@@ -178,16 +178,16 @@ module Katello
       filter = id_rule.filter
       filter.reload
 
-      assert_equal [rpm2.pulp_id], filter.content_unit_pulp_ids(@repo)
+      assert_equal [rpm2.pulp_prn], filter.content_unit_pulp_prns(@repo)
     end
 
-    def test_content_unit_pulp_ids_by_updated_end_date_returns_pulp_hrefs
+    def test_content_unit_pulp_prns_by_updated_end_date_returns_pulp_hrefs
       rpm1 = @repo.rpms.first
       rpm2 = @repo.rpms.last
-      erratum1 = Katello::Erratum.new(:pulp_id => "one", :errata_id => "ERRATA1", :updated => "2018-01-01",
+      erratum1 = Katello::Erratum.new(:pulp_prn => "one", :errata_id => "ERRATA1", :updated => "2018-01-01",
                                       :errata_type => 'bugfix')
       erratum1.packages << Katello::ErratumPackage.new(:filename => rpm1.filename, :name => "e1", :nvrea => "e1")
-      erratum2 = Katello::Erratum.new(:pulp_id => "two", :errata_id => "ERRATA2", :updated => "2019-06-01",
+      erratum2 = Katello::Erratum.new(:pulp_prn => "two", :errata_id => "ERRATA2", :updated => "2019-06-01",
                                       :errata_type => 'enhancement')
       erratum2.packages << Katello::ErratumPackage.new(:filename => rpm2.filename, :name => "e2", :nvrea => "e2")
 
@@ -197,16 +197,16 @@ module Katello
       id_rule = FactoryBot.create(:katello_content_view_erratum_filter_rule, :end_date => "2019-01-01")
       filter = id_rule.filter
       filter.reload
-      assert_equal [rpm1.pulp_id], filter.content_unit_pulp_ids(@repo)
+      assert_equal [rpm1.pulp_prn], filter.content_unit_pulp_prns(@repo)
     end
 
-    def test_content_unit_pulp_ids_by_issued_end_date_returns_pulp_hrefs
+    def test_content_unit_pulp_prns_by_issued_end_date_returns_pulp_hrefs
       rpm1 = @repo.rpms.first
       rpm2 = @repo.rpms.last
-      erratum1 = Katello::Erratum.new(:pulp_id => "one", :errata_id => "ERRATA1", :issued => "2018-01-01",
+      erratum1 = Katello::Erratum.new(:pulp_prn => "one", :errata_id => "ERRATA1", :issued => "2018-01-01",
                                       :errata_type => 'enhancement')
       erratum1.packages << Katello::ErratumPackage.new(:filename => rpm1.filename, :name => "e1", :nvrea => "e1")
-      erratum2 = Katello::Erratum.new(:pulp_id => "two", :errata_id => "ERRATA2", :issued => "2019-06-01",
+      erratum2 = Katello::Erratum.new(:pulp_prn => "two", :errata_id => "ERRATA2", :issued => "2019-06-01",
                                       :errata_type => 'enhancement')
       erratum2.packages << Katello::ErratumPackage.new(:filename => rpm2.filename, :name => "e2", :nvrea => "e2")
 
@@ -218,19 +218,19 @@ module Katello
       filter = id_rule.filter
       filter.reload
 
-      assert_equal [rpm2.pulp_id], filter.content_unit_pulp_ids(@repo)
+      assert_equal [rpm2.pulp_prn], filter.content_unit_pulp_prns(@repo)
     end
 
-    def test_content_unit_pulp_ids_by_errata_type
+    def test_content_unit_pulp_prns_by_errata_type
       rpm1 = @repo.rpms[0]
       rpm2 = @repo.rpms[1]
       rpm3 = @repo.rpms[2]
 
-      erratum1 = Katello::Erratum.new(:pulp_id => "one", :errata_id => "ERRATA1", :errata_type => 'bugfix')
+      erratum1 = Katello::Erratum.new(:pulp_prn => "one", :errata_id => "ERRATA1", :errata_type => 'bugfix')
       erratum1.packages << Katello::ErratumPackage.new(:filename => rpm1.filename, :name => "e1", :nvrea => "e1")
-      erratum2 = Katello::Erratum.new(:pulp_id => "two", :errata_id => "ERRATA2", :errata_type => 'security')
+      erratum2 = Katello::Erratum.new(:pulp_prn => "two", :errata_id => "ERRATA2", :errata_type => 'security')
       erratum2.packages << Katello::ErratumPackage.new(:filename => rpm2.filename, :name => "e2", :nvrea => "e2")
-      erratum3 = Katello::Erratum.new(:pulp_id => "three", :errata_id => "ERRATA3", :errata_type => 'not_recognized')
+      erratum3 = Katello::Erratum.new(:pulp_prn => "three", :errata_id => "ERRATA3", :errata_type => 'not_recognized')
       erratum3.packages << Katello::ErratumPackage.new(:filename => rpm3.filename, :name => "e3", :nvrea => "e3")
 
       @repo.errata = [erratum2]
@@ -240,19 +240,19 @@ module Katello
       filter = id_rule.filter
       filter.reload
 
-      assert_equal [rpm2.pulp_id], filter.content_unit_pulp_ids(@repo)
+      assert_equal [rpm2.pulp_prn], filter.content_unit_pulp_prns(@repo)
     end
 
-    def test_content_unit_pulp_ids_by_errata_type_other
+    def test_content_unit_pulp_prns_by_errata_type_other
       rpm1 = @repo.rpms[0]
       rpm2 = @repo.rpms[1]
       rpm3 = @repo.rpms[2]
 
-      erratum1 = Katello::Erratum.new(:pulp_id => "one", :errata_id => "ERRATA1", :errata_type => 'bugfix')
+      erratum1 = Katello::Erratum.new(:pulp_prn => "one", :errata_id => "ERRATA1", :errata_type => 'bugfix')
       erratum1.packages << Katello::ErratumPackage.new(:filename => rpm1.filename, :name => "e1", :nvrea => "e1")
-      erratum2 = Katello::Erratum.new(:pulp_id => "two", :errata_id => "ERRATA2", :errata_type => 'security')
+      erratum2 = Katello::Erratum.new(:pulp_prn => "two", :errata_id => "ERRATA2", :errata_type => 'security')
       erratum2.packages << Katello::ErratumPackage.new(:filename => rpm2.filename, :name => "e2", :nvrea => "e2")
-      erratum3 = Katello::Erratum.new(:pulp_id => "three", :errata_id => "ERRATA3", :errata_type => 'not_recognized')
+      erratum3 = Katello::Erratum.new(:pulp_prn => "three", :errata_id => "ERRATA3", :errata_type => 'not_recognized')
       erratum3.packages << Katello::ErratumPackage.new(:filename => rpm3.filename, :name => "e3", :nvrea => "e3")
 
       @repo.errata = [erratum3]
@@ -263,7 +263,7 @@ module Katello
       filter = id_rule.filter
       filter.reload
 
-      assert_equal [rpm3.pulp_id], filter.content_unit_pulp_ids(@repo)
+      assert_equal [rpm3.pulp_prn], filter.content_unit_pulp_prns(@repo)
     end
   end
 end

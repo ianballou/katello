@@ -76,7 +76,7 @@ module Katello
         repo = katello_repositories(:rhel_6_x86_64)
         repo.root.update(http_proxy_policy: Katello::RootRepository::GLOBAL_DEFAULT_HTTP_PROXY)
 
-        global_repos = RootRepository.with_global_proxy.uniq.collect(&:library_instance).sort_by(&:pulp_id)
+        global_repos = RootRepository.with_global_proxy.uniq.collect(&:library_instance).sort_by(&:pulp_prn)
         ForemanTasks.expects(:async_task).with(
           ::Actions::BulkAction,
           ::Actions::Katello::Repository::UpdateHttpProxyDetails,
@@ -91,7 +91,7 @@ module Katello
         repo = katello_repositories(:rhel_6_x86_64)
         repo.root.update(http_proxy_policy: Katello::RootRepository::GLOBAL_DEFAULT_HTTP_PROXY)
 
-        global_repos = RootRepository.with_global_proxy.uniq.collect(&:library_instance).sort_by(&:pulp_id)
+        global_repos = RootRepository.with_global_proxy.uniq.collect(&:library_instance).sort_by(&:pulp_prn)
         global_repos.each do |global_repo|
           global_repo.update(remote_href: 'remote_href')
         end

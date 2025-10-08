@@ -45,7 +45,7 @@ module Katello
 
         def test_pulp_data
           assert_equal @@srpm_names[0],
-            ::Katello::Pulp3::Srpm.new(@@srpms.min_by(&:name).pulp_id).backend_data["name"]
+            ::Katello::Pulp3::Srpm.new(@@srpms.min_by(&:name).pulp_prn).backend_data["name"]
         end
       end
 
@@ -70,9 +70,9 @@ module Katello
 
       class SrpmNonVcrTest < ActiveSupport::TestCase
         def test_generate_model_row
-          pulp_id = 'foo'
-          model = Srpm.create!(:pulp_id => pulp_id)
-          json = model.attributes.merge('pulp_href' => pulp_id, 'summary' => 'an update', 'version' => '3', 'release' => '4')
+          pulp_prn = 'foo'
+          model = Srpm.create!(:pulp_prn => pulp_prn)
+          json = model.attributes.merge('pulp_href' => pulp_prn, 'summary' => 'an update', 'version' => '3', 'release' => '4')
 
           row = Katello::Pulp3::Srpm.generate_model_row(json)
           model = ::Katello::Srpm.new(row)

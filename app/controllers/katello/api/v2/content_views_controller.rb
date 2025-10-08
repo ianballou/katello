@@ -330,8 +330,8 @@ module Katello
         top_rec = records[0]
         latest = top_rec.dup
         latest.version = _("Always Use Latest (currently %{version})") % { version: latest.version }
-        latest.pulp_id = nil
-        module_records.delete(top_rec) if selected_latest_versions.include?(top_rec.pulp_id)
+        latest.pulp_prn = nil
+        module_records.delete(top_rec) if selected_latest_versions.include?(top_rec.pulp_prn)
         module_records.push(latest)
       end
       module_records

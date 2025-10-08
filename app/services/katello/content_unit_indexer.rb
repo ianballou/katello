@@ -41,7 +41,7 @@ module Katello
           # Even after this bug (https://github.com/pulp/pulp_rpm/issues/2821) is fixed,
           # it is possible to have duplicate errata associated to a repo.
           if @content_type.label == 'erratum'
-            to_insert.uniq! { |row| row["pulp_id"] || row[:pulp_id] }
+            to_insert.uniq! { |row| row["pulp_prn"] || row[:pulp_prn] }
           end
 
           next if to_insert.empty?
@@ -62,13 +62,13 @@ module Katello
         to_update = units.map do |unit|
           @service_class.generate_model_row(unit)
         end
-        @model_class.upsert_all(to_update, unique_by: :pulp_id)
+        @model_class.upsert_all(to_update, unique_by: :pulp_prn)
       end
     end
 
     def import_associations(units)
-      pulp_id_to_id = self.class.pulp_id_to_id_map(@content_type, units.map { |unit| unit[@service_class.unit_identifier] })
-      @service_class.insert_child_associations(units, pulp_id_to_id) if @service_class.respond_to?(:insert_child_associations)
+      pulp_prn_to_id = self.class.pulp_prn_to_id_map(@content_type, units.map { |unit| unit[@service_class.unit_identifier] })
+      @service_class.insert_child_associations(units, pulp_prn_to_id) if @service_class.respond_to?(:insert_child_associations)
     end
 
     def units_from_pulp(&block)
@@ -79,10 +79,10 @@ module Katello
       end
     end
 
-    def self.pulp_id_to_id_map(content_type, pulp_ids)
+    def self.pulp_prn_to_id_map(content_type, pulp_prns)
       map = {}
-      content_type.model_class.with_pulp_id(pulp_ids).select(:id, :pulp_id).each do |model|
-        map[model.pulp_id] = model.id
+      content_type.model_class.with_pulp_prn(pulp_prns).select(:id, :pulp_prn).each do |model|
+        map[model.pulp_prn] = model.id
       end
       map
     end
@@ -99,33 +99,33 @@ module Katello
         db_values.map { |row| row[@content_type.model_class.unit_id_field] }
       end
 
-      #pulp_href is only provided if we're storing a different 'pulp_id' on the repo association
+      #backend_prn is only provided if we're storing a different 'prn' on the repo association
       def push(unit)
         if @service_class.backend_unit_identifier
-          pulp_href = unit.dig(@service_class.backend_unit_identifier)
+          backend_prn = unit.dig(@service_class.backend_unit_identifier)
         else
-          pulp_href = nil
+          backend_prn = nil
         end
-        unit_id = unit[@service_class.unit_identifier]
-        @values[unit_id] = pulp_href
+        unit_prn = unit[@service_class.unit_identifier]
+        @values[unit_prn] = backend_prn
       end
 
       def db_values
         return @final_values if @final_values
         @final_value = []
 
-        @final_values = ::Katello::ContentUnitIndexer.pulp_id_to_id_map(@content_type, @values.keys).map do |pulp_id, katello_id|
+        @final_values = ::Katello::ContentUnitIndexer.pulp_prn_to_id_map(@content_type, @values.keys).map do |pulp_prn, katello_id|
           #:repository_id => X, :erratum_id => y
           row = {:repository_id => @repository.id, @content_type.model_class.unit_id_field => katello_id}
-          row[pulp_href_association_name] = @values[pulp_id] if pulp_href_association_name
+          row[prn_association_name] = @values[pulp_prn] if prn_association_name
           row
         end
         ContentUnitIndexer.insert_timestamps(@content_type.model_class, @final_values)
         @final_values
       end
 
-      def pulp_href_association_name
-        'erratum_pulp3_href' if @content_type.label == 'erratum'
+      def prn_association_name
+        'erratum_prn' if @content_type.label == 'erratum'
       end
     end
 
@@ -177,7 +177,7 @@ module Katello
         filter_rules = ::Katello::ContentViewErratumFilterRule.in_content_views(affected_content_view_ids).where(errata_id: errata_ids)
         filter_rules.delete_all
       when 'Katello::PackageGroup'
-        package_group_uuids = ::Katello::PackageGroup.where(id: repo_associations_to_destroy.select(:package_group_id)).pluck(:pulp_id)
+        package_group_uuids = ::Katello::PackageGroup.where(id: repo_associations_to_destroy.select(:package_group_id)).pluck(:pulp_prn)
         filter_rules = ::Katello::ContentViewPackageGroupFilterRule.
           in_content_views(affected_content_view_ids).where(uuid: package_group_uuids)
         filter_rules.delete_all
@@ -190,9 +190,9 @@ module Katello
       retry_count = 0
       begin
         if @content_type.mutable
-          @model_class.upsert_all(to_insert, unique_by: :pulp_id)
+          @model_class.upsert_all(to_insert, unique_by: :pulp_prn)
         else
-          @model_class.insert_all(to_insert, unique_by: :pulp_id)
+          @model_class.insert_all(to_insert, unique_by: :pulp_prn)
         end
       rescue ActiveRecord::Deadlocked
         retry_count += 1

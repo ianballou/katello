@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :docker_tag, :class => Katello::DockerTag do
     sequence(:name) { |n| "2.#{n}" }
-    pulp_id { SecureRandom.hex }
+    pulp_prn { SecureRandom.hex }
 
     association :docker_taggable, :factory => :docker_manifest
 
@@ -13,7 +13,7 @@ FactoryBot.define do
     end
 
     trait :with_uuid do
-      pulp_id { SecureRandom.hex }
+      pulp_prn { SecureRandom.hex }
     end
 
     trait :with_manifest_list do

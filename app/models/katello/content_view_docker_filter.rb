@@ -46,7 +46,7 @@ module Katello
                                    where(:repository_id => repo.id).
                                    select(:docker_tag_id)).where("name ilike ?", query_name).
         all.collect do |tag|
-          tag.pulp_id
+          tag.pulp_prn
         end
       end
       names.flatten.uniq

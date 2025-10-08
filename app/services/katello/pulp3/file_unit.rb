@@ -17,14 +17,14 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::File.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
       def self.generate_model_row(unit)
         filename = File.basename(unit['relative_path'].try(:split, '/').try(:[], -1))
 
         {
-          pulp_id: unit[unit_identifier],
+          pulp_prn: unit[unit_identifier],
           name: filename,
           path: unit['relative_path'],
           checksum: unit['sha256'],

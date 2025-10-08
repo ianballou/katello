@@ -35,7 +35,7 @@ module Katello
 
     def test_python_package_index_cvv
       @cvv = katello_content_view_versions(:library_dev_view_version)
-      Katello::Repository.create!(:root_id => @repo.root_id, :content_view_version_id => @cvv.id, :pulp_id => 'bkjaskdjfdf',
+      Katello::Repository.create!(:root_id => @repo.root_id, :content_view_version_id => @cvv.id, :pulp_prn => 'bkjaskdjfdf',
                                   :relative_path => '/some_path')
 
       response = get :index, params: { content_view_version_id: @cvv.id, content_type: "python_package" }

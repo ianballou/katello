@@ -5,7 +5,7 @@ module Katello
     class Repository
       class AnsibleCollection < ::Katello::Pulp3::Repository
         def copy_content_for_source(source_repository, _options = {})
-          copy_units_by_href(source_repository.ansible_collections.pluck(:pulp_id))
+          copy_units_by_href(source_repository.ansible_collections.pluck(:pulp_prn))
         end
 
         def remote_options
@@ -20,7 +20,7 @@ module Katello
         def distribution_options(path)
           {
             base_path: path,
-            repository_version: repo.version_href,
+            repository_version: repo.version_prn,
             name: "#{generate_backend_object_name}",
           }
         end

@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :katello_repository, :class => Katello::Repository do
     association :root, :factory => :katello_root_repository, :strategy => :build
 
-    sequence(:pulp_id) { |n| "pulp-#{n}" }
+    sequence(:pulp_prn) { |n| "pulp-#{n}" }
     sequence(:relative_path) { |n| "/ACME_Corporation/DEV/Repo#{n}" }
 
     transient do
@@ -27,7 +27,7 @@ FactoryBot.define do
 
     trait :fedora_17_el6 do
       association :root, :factory => :katello_root_repository, :trait => :fedora_17_el6_root, :strategy => :build
-      pulp_id { "Fedora_17_el6" }
+      pulp_prn { "Fedora_17_el6" }
       relative_path { "/ACME_Corporation/Library/fedora_17_el6_label" }
     end
 
@@ -35,7 +35,7 @@ FactoryBot.define do
       association :root, :fedora_17_x86_64_dev_root, :factory => :katello_root_repository, :strategy => :build
       name { "Fedora 17" }
       label { "fedora_17_dev_label" }
-      pulp_id { "2" }
+      pulp_prn { "2" }
       content_id { "1" }
       relative_path { "/ACME_Corporation/DEV/fedora_17_el6_label" }
     end

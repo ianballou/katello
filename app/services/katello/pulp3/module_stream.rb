@@ -11,11 +11,11 @@ module Katello
       def self.ids_for_repository(repo_id)
         repo = Katello::Pulp3::Repository::Yum.new(Katello::Repository.find(repo_id), SmartProxy.pulp_primary)
         repo_content_list = repo.content_list
-        repo_content_list.map { |content| content.try(:pulp_href) }
+        repo_content_list.map { |content| content.try(:prn) }
       end
 
-      def self.build_stream_rpms(katello_id, package_hrefs)
-        package_ids = Katello::Rpm.where(:pulp_id => package_hrefs).pluck(:id)
+      def self.build_stream_rpms(katello_id, package_prns)
+        package_ids = Katello::Rpm.where(:pulp_prn => package_prns).pluck(:id)
         rpms = package_ids.map do |package_id|
           {
             module_stream_id: katello_id,
@@ -67,7 +67,7 @@ module Katello
       def self.generate_model_row(unit)
         shared_attributes = unit.keys & Katello::ModuleStream.column_names
         to_return = unit.select { |key, _v| shared_attributes.include?(key) }
-        to_return['pulp_id'] = unit['pulp_href']
+        to_return['pulp_prn'] = unit['prn']
         to_return[:created_at] = DateTime.now
         to_return[:updated_at] = DateTime.now
         to_return
@@ -81,12 +81,12 @@ module Katello
         rows
       end
 
-      def self.insert_child_associations(units, pulp_id_to_id)
+      def self.insert_child_associations(units, pulp_prn_to_id)
         artifacts = []
         profiles = []
         stream_rpms = []
         units.each do |unit|
-          katello_id = pulp_id_to_id[unit[unit_identifier]]
+          katello_id = pulp_prn_to_id[unit[unit_identifier]]
           artifacts += build_artifacts(katello_id, unit['artifacts'])
           profiles += build_profiles(katello_id, unit['profiles'])
           stream_rpms += build_stream_rpms(katello_id, unit['packages'])
@@ -99,7 +99,7 @@ module Katello
         #have to import profile_rpms after profiles
         profile_rpms = []
         units.each do |unit|
-          katello_id = pulp_id_to_id[unit[unit_identifier]]
+          katello_id = pulp_prn_to_id[unit[unit_identifier]]
           profile_rpms += build_profile_rpms(katello_id, unit['profiles'])
         end
         Katello::ModuleProfileRpm.insert_all(profile_rpms, unique_by: [:module_profile_id, :name]) if profile_rpms.any?

@@ -12,9 +12,9 @@ module Katello
         @repo_service = repository_service
       end
 
-      def content_guard_href
+      def content_guard_prn
         content_guard_api = ::Katello::Pulp3::Api::ContentGuard.new(smart_proxy)
-        content_guard_api.list&.results&.first&.pulp_href
+        content_guard_api.list&.results&.first&.prn
       end
 
       def backend_object_name
@@ -23,11 +23,11 @@ module Katello
       end
 
       def refresh_entities
-        href = remote_href
-        if href
+        prn = remote_prn
+        if prn
           # Do not consider remotes_uln_api, since the Katello server is not a ULN server. Even if the sync
           # to Katello used ULN, the sync from Katello server to smart proxy will use a normal RPM remote!
-          [api.remotes_api.partial_update(href, remote_options)]
+          [api.remotes_api.partial_update(prn, remote_options)]
         else
           create_remote
           []
@@ -41,8 +41,8 @@ module Katello
         options.keys.any? { |key| remote.send(key) != options[key] }
       end
 
-      def remote_href
-        fetch_remote.try(:pulp_href)
+      def remote_prn
+        fetch_remote.try(:prn)
       end
 
       def create_entities
@@ -55,38 +55,38 @@ module Katello
       end
 
       def update
-        api.repositories_api.update(repository_href, name: backend_object_name)
+        api.repositories_api.update(repository_prn, name: backend_object_name)
       end
 
-      def delete(href = repository_href)
-        api.repositories_api.delete(href) if href
+      def delete(prn = repository_prn)
+        api.repositories_api.delete(prn) if prn
       rescue api.api_exception_class => e
         raise e if e.code != 404
         nil
       end
 
-      def repository_href
-        fetch_repository.try(:pulp_href)
+      def repository_prn
+        fetch_repository.try(:prn)
       end
 
       def fetch_repository
         repo_service.api.list_all(name: backend_object_name).first
       end
 
-      def version_href
+      def version_prn
         fetch_repository&.latest_version_href
       end
 
-      def publication_href
+      def publication_prn
         if repo_service.repo.content_type == "deb"
-          api.publications_verbatim_api.list(:repository_version => version_href).results.first&.pulp_href
+          api.publications_verbatim_api.list(:repository_version => version_prn).results.first&.prn
         else
-          api.publications_api.list(:repository_version => version_href).results.first&.pulp_href
+          api.publications_api.list(:repository_version => version_prn).results.first&.prn
         end
       end
 
       def create_version(options = {})
-        api.repository_versions_api.create(repository_href, options)
+        api.repository_versions_api.create(repository_prn, options)
       end
 
       def distribution_options(path, options = {})
@@ -94,7 +94,7 @@ module Katello
           base_path: path,
           name: "#{backend_object_name}",
         }
-        ret[:content_guard] = repo.unprotected ? nil : content_guard_href
+        ret[:content_guard] = repo.unprotected ? nil : content_guard_prn
         ret[:publication] = options[:publication] if options.key? :publication
         ret[:repository_version] = options[:repository_version] if options.key? :repository_version
         ret
@@ -126,7 +126,7 @@ module Katello
 
       def sync(options = {})
         sync_params = repo_service.sync_url_params(options)
-        sync_params[:remote] = remote_href
+        sync_params[:remote] = remote_prn
         if repo.yum?
           sync_params.delete(:skip_types) if sync_params[:skip_types]
           sync_params[:sync_policy] = 'mirror_complete'
@@ -135,7 +135,7 @@ module Katello
           sync_params[:mirror] = true
         end
         repository_sync_url_data = api.repository_sync_url_class.new(sync_params)
-        [api.repositories_api.sync(repository_href, repository_sync_url_data)]
+        [api.repositories_api.sync(repository_prn, repository_sync_url_data)]
       end
 
       def common_remote_options
@@ -168,12 +168,12 @@ module Katello
       end
 
       def create_publication
-        if (href = version_href)
+        if (prn = version_prn)
           if repo_service.repo.content_type == "deb"
-            publication_data = api.publication_verbatim_class.new({repository_version: href})
+            publication_data = api.publication_verbatim_class.new({repository_version: prn})
             api.publications_verbatim_api.create(publication_data)
           else
-            publication_data = api.publication_class.new(repository_version: href)
+            publication_data = api.publication_class.new(repository_version: prn)
             api.publications_api.create(publication_data)
           end
         end
@@ -183,11 +183,11 @@ module Katello
         path = repo_service.relative_path
         dist_params = {}
         if repo_service.repo.repository_type.pulp3_skip_publication
-          dist_params[:repository_version] = version_href
-          fail "could not lookup a version_href for repo #{repo_service.repo.id}" if version_href.nil?
+          dist_params[:repository_version] = version_prn
+          fail "could not lookup a version_prn for repo #{repo_service.repo.id}" if version_prn.nil?
         else
-          dist_params[:publication] = publication_href
-          fail "Could not lookup a publication_href for repo #{repo_service.repo.id}" if publication_href.nil?
+          dist_params[:publication] = publication_prn
+          fail "Could not lookup a publication_prn for repo #{repo_service.repo.id}" if publication_prn.nil?
         end
 
         dist_options = distribution_options(path, dist_params)
@@ -196,7 +196,7 @@ module Katello
           (distro = repo_service.lookup_distributions(name: "#{backend_object_name}").first)
           # update dist
           dist_options = dist_options.except(:name)
-          api.distributions_api.partial_update(distro.pulp_href, dist_options)
+          api.distributions_api.partial_update(distro.prn, dist_options)
         else
           # create dist
           distribution_data = api.distribution_class.new(dist_options)
@@ -207,15 +207,15 @@ module Katello
       def count_by_pulpcore_type(service_class)
         # Currently only supports SRPMs and Docker Manifest Lists
         fail NotImplementedError unless [::Katello::Pulp3::Srpm, ::Katello::Pulp3::DockerManifestList].include?(service_class)
-        count = service_class.content_api(smart_proxy).list(service_class.page_options(limit: 1, fields: ['count'], repository_version: version_href)).count
+        count = service_class.content_api(smart_proxy).list(service_class.page_options(limit: 1, fields: ['count'], repository_version: version_prn)).count
         return 0 if count.nil?
         count
       end
 
       def latest_content_counts
-        version_pulp_href = version_href
-        return unless version_pulp_href
-        api.repository_versions_api.read(version_pulp_href)&.content_summary&.present
+        version_pulp_prn = version_prn
+        return unless version_pulp_prn
+        api.repository_versions_api.read(version_pulp_prn)&.content_summary&.present
       end
 
       def pulp3_enabled_repo_types
@@ -231,8 +231,8 @@ module Katello
 
       def repair
         data = api.repair_class.new
-        fail "Could not lookup a version_href for repo #{repo_service.repo.id}" if version_href.nil?
-        api.repository_versions_api.repair(version_href, data)
+        fail "Could not lookup a version_prn for repo #{repo_service.repo.id}" if version_prn.nil?
+        api.repository_versions_api.repair(version_prn, data)
       end
     end
   end

@@ -734,7 +734,7 @@ module ::Actions::Katello::ContentView
 
       module_stream_rule = ::Katello::ContentViewModuleStreamFilterRule.create(content_view_filter_id: module_stream_filter.id, module_stream_id: module_stream.id)
       errata_rule = ::Katello::ContentViewErratumFilterRule.create(content_view_filter_id: errata_filter.id, errata_id: erratum.errata_id)
-      package_group_rule = ::Katello::ContentViewPackageGroupFilterRule.create(content_view_filter_id: package_group_filter.id, uuid: package_group.pulp_id)
+      package_group_rule = ::Katello::ContentViewPackageGroupFilterRule.create(content_view_filter_id: package_group_filter.id, uuid: package_group.pulp_prn)
 
       action.expects(:action_subject).with(content_view)
       plan_action action, content_view, {'repository_ids' => []}, nil

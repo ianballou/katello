@@ -19,9 +19,9 @@ module Katello
     end
 
     def test_create
-      pulp_id = 'foo'
-      assert Erratum.create!(:pulp_id => pulp_id)
-      assert Erratum.find_by_pulp_id(pulp_id)
+      pulp_prn = 'foo'
+      assert Erratum.create!(:pulp_prn => pulp_prn)
+      assert Erratum.find_by_pulp_prn(pulp_id)
     end
 
     def test_search_reboot_suggested
@@ -42,7 +42,7 @@ module Katello
     end
 
     def test_with_identifiers_multiple
-      errata = Katello::Erratum.with_identifiers([@security.id, @bugfix.pulp_id, @enhancement.errata_id])
+      errata = Katello::Erratum.with_identifiers([@security.id, @bugfix.pulp_prn, @enhancement.errata_id])
 
       assert_equal 3, errata.length
       assert_includes errata, @security
@@ -95,7 +95,7 @@ module Katello
         ids_href_map["errata_id_#{i}"] = "pulp_href#{i}"
         i += 1
       end
-      Katello::Erratum.import([:pulp_id], ids, validate: false)
+      Katello::Erratum.import([:pulp_prn], ids, validate: false)
 
       content_type = Katello::RepositoryTypeManager.find_content_type('erratum')
       service_class = content_type.pulp3_service_class

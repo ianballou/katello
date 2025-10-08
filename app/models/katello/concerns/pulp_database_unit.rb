@@ -13,7 +13,7 @@ module Katello
     end
 
     def backend_data
-      self.class.pulp_data(pulp_id) || {}
+      self.class.pulp_data(pulp_prn) || {}
     end
 
     def remove_from_repository(repo_id)
@@ -142,7 +142,7 @@ module Katello
         ids = [ids] unless ids.is_a?(Array)
         ids.map!(&:to_s)
         id_integers = ids.map { |string| Integer(string) rescue -1 }
-        where("#{self.table_name}.id in (?) or #{self.table_name}.pulp_id in (?)", id_integers, ids)
+        where("#{self.table_name}.id in (?) or #{self.table_name}.pulp_prn in (?)", id_integers, ids)
       end
 
       def orphaned
@@ -153,12 +153,12 @@ module Katello
         where(:id => repository_association_class.where(:repository_id => repos).select(unit_id_field))
       end
 
-      def pulp_data(pulp_id)
-        content_unit_class.new(pulp_id)
+      def pulp_data(pulp_prn)
+        content_unit_class.new(pulp_prn)
       end
 
-      def with_pulp_id(unit_pulp_ids)
-        where('pulp_id in (?)', unit_pulp_ids)
+      def with_pulp_prn(unit_pulp_prns)
+        where('pulp_prn in (?)', unit_pulp_prns)
       end
 
       def unit_id_field

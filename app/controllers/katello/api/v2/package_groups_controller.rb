@@ -7,17 +7,17 @@ module Katello
       collection_ids = []
       current_ids = filter.package_group_rules.map(&:uuid)
       filter.applicable_repos.each do |repo|
-        collection_ids.concat(repo.package_groups.map(&:pulp_id))
+        collection_ids.concat(repo.package_groups.map(&:pulp_prn))
       end
-      collection = PackageGroup.where(:pulp_id => collection_ids)
-      collection = collection.where("pulp_id not in (?)", current_ids) unless current_ids.empty?
+      collection = PackageGroup.where(:pulp_prn => collection_ids)
+      collection = collection.where("pulp_prn not in (?)", current_ids) unless current_ids.empty?
       collection
     end
 
     def all_for_content_view_filter(filter, _collection)
-      available_ids = PackageGroup.joins(:repositories).merge(filter.applicable_repos)&.pluck(:pulp_id) || []
+      available_ids = PackageGroup.joins(:repositories).merge(filter.applicable_repos)&.pluck(:pulp_prn) || []
       added_ids = filter&.package_group_rules&.pluck(:uuid) || []
-      PackageGroup.where(pulp_id: available_ids + added_ids)
+      PackageGroup.where(pulp_prn: available_ids + added_ids)
     end
 
     def default_sort

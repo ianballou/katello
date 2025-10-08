@@ -1,13 +1,13 @@
 server_pg:
   name: "Katello Server Development"
-  pulp_id: "4f9eea2a-a124-497e-8492-828b6d938aaa"
+  pulp_prn: "4f9eea2a-a124-497e-8492-828b6d938aaa"
   description: "fun packages for servers"
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>
 
 mammals_pg:
   name: "mammals"
-  pulp_id: "4f9eea2a-a124-497e-8492-828b64444abc"
+  pulp_prn: "4f9eea2a-a124-497e-8492-828b64444abc"
   description: "all kinds of mammals"
   created_at: <%= Time.now %>
   updated_at: <%= Time.now %>

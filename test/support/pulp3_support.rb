@@ -20,7 +20,7 @@ module Katello
       Cert::Certs.stubs(:candlepin_client_ca_cert).returns(cert)
       Katello::Pulp3::ContentGuard.import(smart_proxy, true) unless repo.unprotected
       service = repo.backend_service(smart_proxy)
-      service.class.any_instance.stubs(:generate_backend_object_name).returns(repo.pulp_id)
+      service.class.any_instance.stubs(:generate_backend_object_name).returns(repo.pulp_prn)
 
       tasks = []
       if (repo = service.list(name: service.generate_backend_object_name).first)

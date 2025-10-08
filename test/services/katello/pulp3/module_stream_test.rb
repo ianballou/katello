@@ -50,10 +50,10 @@ module Katello
         end
 
         def test_insert_child_associations
-          model = Katello::ModuleStream.create(:pulp_id => pulp_module_data['pulp_href'])
+          model = Katello::ModuleStream.create(:pulp_prn => pulp_module_data['pulp_href'])
 
-          service = Katello::Pulp3::ModuleStream.new(model.pulp_id)
-          service.class.insert_child_associations([pulp_module_data], {model.pulp_id => model.id})
+          service = Katello::Pulp3::ModuleStream.new(model.pulp_prn)
+          service.class.insert_child_associations([pulp_module_data], {model.pulp_prn => model.id})
 
           model.reload
           assert_equal 2, model.artifacts.count

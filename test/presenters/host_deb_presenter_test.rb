@@ -29,7 +29,7 @@ module Katello
     test "with_latest" do
       host = katello_content_facets(:content_facet_one).host
       host.content_facet.bound_repositories << @repo
-      update = Katello::Deb.create(name: 'uno', pulp_id: 'uno-new-uuid', version: '1.2', architecture: 'amd64')
+      update = Katello::Deb.create(name: 'uno', pulp_prn: 'uno-new-uuid', version: '1.2', architecture: 'amd64')
       ::Katello::Deb.stubs(:installable_for_hosts).returns(Katello::Deb.where(id: update.id))
       presenter = HostDebPresenter.with_latest([installed_deb], host).first
 
@@ -41,7 +41,7 @@ module Katello
     test "with arch" do
       host = katello_content_facets(:content_facet_one).host
       host.content_facet.bound_repositories << @repo
-      update = Katello::Deb.create(name: 'one', pulp_id: 'one-new-uuid', version: '1.2', architecture: 'noarch')
+      update = Katello::Deb.create(name: 'one', pulp_prn: 'one-new-uuid', version: '1.2', architecture: 'noarch')
       ::Katello::Deb.stubs(:installable_for_hosts).returns(Katello::Deb.where(id: update.id))
       presenter = HostDebPresenter.with_latest([installed_deb], host).first
 

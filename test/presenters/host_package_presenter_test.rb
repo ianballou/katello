@@ -29,7 +29,7 @@ module Katello
     test "with_latest" do
       host = katello_content_facets(:content_facet_one).host
       host.content_facet.bound_repositories << @repo
-      update = Katello::Rpm.create(name: 'one', pulp_id: 'one-new-uuid', version: '1.2', nvra: new_version, release: '5', arch: 'x86_64')
+      update = Katello::Rpm.create(name: 'one', pulp_prn: 'one-new-uuid', version: '1.2', nvra: new_version, release: '5', arch: 'x86_64')
       ::Katello::Rpm.stubs(:installable_for_hosts).returns(Katello::Rpm.where(id: update.id))
       presenter = HostPackagePresenter.with_latest([installed_package], host).first
 
@@ -41,7 +41,7 @@ module Katello
     test "with arch" do
       host = katello_content_facets(:content_facet_one).host
       host.content_facet.bound_repositories << @repo
-      update = Katello::Rpm.create(name: 'one', pulp_id: 'one-new-uuid', version: '1.2', nvra: 'one-1.2-5.el7.noarch', release: '5', arch: 'noarch')
+      update = Katello::Rpm.create(name: 'one', pulp_prn: 'one-new-uuid', version: '1.2', nvra: 'one-1.2-5.el7.noarch', release: '5', arch: 'noarch')
       ::Katello::Rpm.stubs(:installable_for_hosts).returns(Katello::Rpm.where(id: update.id))
       presenter = HostPackagePresenter.with_latest([installed_package], host).first
 

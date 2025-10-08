@@ -147,17 +147,17 @@ module Actions
           repo_mapping.each do |source_repos, dest_repo|
             old_version_repo = old_version.repositories.archived.find_by(root_id: dest_repo.root_id)
 
-            next if old_version_repo.version_href == old_version_repo.library_instance.version_href
+            next if old_version_repo.version_prn == old_version_repo.library_instance.version_prn
 
             source_library_repo = source_repos.first.library_instance? ? source_repos.first : source_repos.first.library_instance
 
             source_repos = [source_library_repo]
-            if old_version_repo.version_href.nil?
+            if old_version_repo.version_prn.nil?
               base_version = 0
             elsif old_version_repo.soft_copy_of_library?
               base_version = nil
             else
-              base_version = old_version_repo.version_href.split("/")[-1].to_i
+              base_version = old_version_repo.version_prn.split("/")[-1].to_i
             end
 
             pulp3_repo_mapping[source_repos.map(&:id)] = { dest_repo: dest_repo.id, base_version: base_version }
@@ -269,8 +269,8 @@ module Actions
           unless cvv_yum_repos.empty? || SmartProxy.pulp_primary.pulp3_support?(cvv_yum_repos.first)
             cvv_yum_repos.each do |repo|
               SmartProxy.pulp_primary.pulp_api.extensions.send(:module_default).
-                copy(repo.library_instance.pulp_id,
-                repo.pulp_id)
+                copy(repo.library_instance.repository_prn,
+                repo.repository_prn)
             end
           end
 
@@ -343,8 +343,8 @@ module Actions
 
         def plan_copy(action_class, source_repo, target_repo, clauses = nil, override_config = nil)
           plan_action(action_class,
-                      :source_pulp_id => source_repo.pulp_id,
-                      :target_pulp_id => target_repo.pulp_id,
+                      :source_repository_prn => source_repo.repository_prn,
+                      :target_repository_prn => target_repo.repository_prn,
                       :full_clauses => clauses,
                       :override_config => override_config,
                       :include_result => true)

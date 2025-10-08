@@ -80,7 +80,7 @@ module Katello
         end
 
         def create_export(exporter_data, chunk_size: nil)
-          exporter_href = exporter_data[:pulp_href]
+          exporter_href = exporter_data[:exporter_prn]
           options = { versions: version_hrefs }
           options[:chunk_size] = "#{chunk_size}GB" if chunk_size
           if from_content_view_version
@@ -115,10 +115,10 @@ module Katello
         end
 
         def destroy_exporter(exporter_data)
-          exporter_href = exporter_data[:pulp_href]
+          exporter_href = exporter_data[:exporter_prn]
           export_data = fetch_export(exporter_href)
           api.exporter_api.partial_update(exporter_href, :last_export => nil)
-          api.export_api.delete(export_data.pulp_href) unless export_data.blank?
+          api.export_api.delete(export_data.prn) unless export_data.blank?
           api.exporter_api.delete(exporter_href)
         end
 

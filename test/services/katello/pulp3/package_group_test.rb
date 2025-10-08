@@ -43,7 +43,7 @@ module Katello
 
         def test_pulp_data
           assert_equal @@package_group_names[0],
-            ::Katello::Pulp3::PackageGroup.new(@@package_groups.min_by(&:name).pulp_id).backend_data["id"]
+            ::Katello::Pulp3::PackageGroup.new(@@package_groups.min_by(&:name).pulp_prn).backend_data["id"]
         end
       end
 
@@ -51,7 +51,7 @@ module Katello
         def test_generate_model_row
           uuid = 'foo'
 
-          PackageGroup.where(:pulp_id => uuid).destroy_all
+          PackageGroup.where(:pulp_prn => uuid).destroy_all
 
           json = {'name' => 'foobar', 'pulp_href' => uuid, 'description' => 'an update'}.with_indifferent_access
           row = Katello::Pulp3::PackageGroup.generate_model_row(json)
@@ -59,7 +59,7 @@ module Katello
 
           assert_equal model.name, json["name"]
           assert_equal model.description, json['description']
-          refute_nil model.pulp_id
+          refute_nil model.pulp_prn
         end
       end
     end

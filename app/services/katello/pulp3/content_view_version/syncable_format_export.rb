@@ -15,7 +15,7 @@ module Katello
             from_repo = from_exporter.repositories.find_by(library_instance_id: repository.library_instance)
             options[:start_repository_version] = from_repo.version_href unless from_repo.blank?
           end
-          [api.yum_export_api.create(exporter_data[:pulp_href], options)]
+          [api.yum_export_api.create(exporter_data[:exporter_prn], options)]
         end
 
         def fetch_export(exporter_href)
@@ -23,9 +23,9 @@ module Katello
         end
 
         def destroy_exporter(exporter_data)
-          exporter_href = exporter_data[:pulp_href]
+          exporter_href = exporter_data[:exporter_prn]
           export_data = fetch_export(exporter_href)
-          api.yum_export_api.delete(export_data.pulp_href)
+          api.yum_export_api.delete(export_data.prn)
           api.yum_exporter_api.delete(exporter_href)
         end
 

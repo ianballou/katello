@@ -13,11 +13,11 @@ module Katello
       @rpm2 = katello_rpms(:two)
       @rpm3 = katello_rpms(:three)
       @rpm4 = Katello::Rpm.new
-      @rpm4.update(:name => "four", :filename => "four-1.1.rpm", :arch => "i386", :pulp_id => "four-uuid")
+      @rpm4.update(:name => "four", :filename => "four-1.1.rpm", :arch => "i386", :pulp_prn => "four-uuid")
       @rpm5 = Katello::Rpm.new
-      @rpm5.update(:name => "five", :filename => "five-1.1.rpm", :version => 2.0, :epoch => 0, :pulp_id => "five-uuid")
+      @rpm5.update(:name => "five", :filename => "five-1.1.rpm", :version => 2.0, :epoch => 0, :pulp_prn => "five-uuid")
 
-      @srpm = Katello::Srpm.new(:name => "srpm1", :filename => "one-1.1.srpm", :version => 2.0, :epoch => 0, :pulp_id => "one-srpm-uuid")
+      @srpm = Katello::Srpm.new(:name => "srpm1", :filename => "one-1.1.srpm", :version => 2.0, :epoch => 0, :pulp_prn => "one-srpm-uuid")
       @repo.srpms = [@srpm]
 
       @repo.rpms = [@rpm, @rpm2, @rpm3, @rpm4, @rpm5]
@@ -59,7 +59,7 @@ module Katello
       @filter = FactoryBot.create(:katello_content_view_package_filter)
       FactoryBot.create(:katello_content_view_package_filter_rule, :filter => @filter, :name => "#{@rpm.name[0..1]}*")
 
-      assert_equal [@rpm.pulp_id], @filter.content_unit_pulp_ids(@repo)
+      assert_equal [@rpm.pulp_prn], @filter.content_unit_pulp_prns(@repo)
     end
 
     def test_arch_filter_generates_mongodb_conditions_by_filename
@@ -76,7 +76,7 @@ module Katello
       FactoryBot.create(:katello_content_view_package_filter_rule, :filter => @filter, :name => "*",
                                    :architecture => @rpm4.arch)
 
-      assert_equal [@rpm4.pulp_id], @filter.content_unit_pulp_ids(@repo)
+      assert_equal [@rpm4.pulp_prn], @filter.content_unit_pulp_prns(@repo)
     end
 
     def test_version_filter_generates_mongodb_conditions_by_filename
@@ -93,7 +93,7 @@ module Katello
       FactoryBot.create(:katello_content_view_package_filter_rule, :filter => @filter, :name => "*",
                                    :version => 2.0)
 
-      assert_equal [@rpm5.pulp_id], @filter.content_unit_pulp_ids(@repo)
+      assert_equal [@rpm5.pulp_prn], @filter.content_unit_pulp_prns(@repo)
     end
 
     def test_version_range_filter_generates_mongodb_conditions_by_filename
@@ -110,7 +110,7 @@ module Katello
       FactoryBot.create(:katello_content_view_package_filter_rule, :filter => @filter, :name => "*",
                                    :min_version => 1.5, :max_version => 3.0)
 
-      assert_equal [@rpm5.pulp_id], @filter.content_unit_pulp_ids(@repo)
+      assert_equal [@rpm5.pulp_prn], @filter.content_unit_pulp_prns(@repo)
     end
   end
 end
