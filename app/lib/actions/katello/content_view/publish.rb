@@ -8,6 +8,7 @@ module Actions
         attr_accessor :version
 
         execution_plan_hooks.use :trigger_capsule_sync, :on => :success
+        execution_plan_hooks.use :auto_publish_composites, :on => :success
         execution_plan_hooks.use :notify_on_failure, :on => [:failure, :paused]
 
         # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
@@ -101,7 +102,6 @@ module Actions
             plan_action(ContentView::ErrataMail, content_view, library) unless options[:skip_promotion]
             plan_action(ContentView::Promote, version, find_environments(options[:environment_ids]), options[:is_force_promote]) if options[:environment_ids]&.any?
             plan_self(history_id: history.id, content_view_id: content_view.id,
-                      auto_publish_composite_ids: auto_publish_composite_ids(content_view),
                       content_view_version_name: version.name,
                       content_view_version_id: version.id,
                       environment_id: library.id, user_id: ::User.current.id, skip_promotion: options[:skip_promotion])
@@ -114,11 +114,6 @@ module Actions
         end
 
         def run
-          version = ::Katello::ContentViewVersion.find(input[:content_view_version_id])
-          # Pass the current execution plan ID so auto_publish can coordinate
-          # with other component CV publishes using Dynflow chaining
-          version.auto_publish_composites!(execution_plan_id)
-
           output[:content_view_id] = input[:content_view_id]
           output[:content_view_version_id] = input[:content_view_version_id]
           output[:skip_promotion] = input[:skip_promotion]
@@ -142,6 +137,13 @@ module Actions
           history = ::Katello::ContentViewHistory.find(input[:history_id])
           history.status = ::Katello::ContentViewHistory::SUCCESSFUL
           history.save!
+        end
+
+        def auto_publish_composites(execution_plan)
+          version = ::Katello::ContentViewVersion.find(input[:content_view_version_id])
+          # Pass the current execution plan ID so auto_publish can coordinate
+          # with other component CV publishes using Dynflow chaining
+          version.auto_publish_composites!(execution_plan.id)
         end
 
         def trigger_capsule_sync(_execution_plan)
@@ -215,10 +217,6 @@ module Actions
           content_view.repos(content_view.organization.library).find_all do |repo|
             !library_instances.include?(repo.library_instance_id)
           end
-        end
-
-        def auto_publish_composite_ids(content_view)
-          content_view.auto_publish_components.pluck(:composite_content_view_id)
         end
 
         def version_for_publish(content_view, options)

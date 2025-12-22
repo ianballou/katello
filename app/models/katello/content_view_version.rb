@@ -367,21 +367,14 @@ module Katello
       self.content_view.auto_publish_components.pluck(:composite_content_view_id).each do |composite_id|
         composite_cv = ::Katello::ContentView.find(composite_id)
 
-        composite_cv.with_lock do
-          status = composite_publish_status(composite_cv)
-
-          case status
-          when :scheduled
-            Rails.logger.info("Composite CV #{composite_cv.name} publish already scheduled, skipping duplicate")
-            next
-          when :running, nil
-            # Either composite is running or no composite activity detected
-            # Schedule event to trigger composite publish with proper coordination
-            Rails.logger.info("Composite CV #{composite_cv.name} scheduling auto-publish event")
-            schedule_auto_publish_event(composite_cv, description, component_task_id)
-            next
-          end
-        end
+        # Use Dynflow chaining to coordinate composite publishes
+        # This ensures the composite waits for all running component publishes to complete
+        self.class.trigger_composite_publish_with_coordination(
+          composite_cv,
+          description,
+          self.id,
+          calling_task_id: component_task_id
+        )
       end
     end
 
@@ -437,60 +430,6 @@ module Katello
     end
 
     private
-
-    # Returns :scheduled, :running, or nil based on composite CV publish task status
-    def composite_publish_status(composite_cv)
-      # Check scheduled tasks first (they don't have input populated yet)
-      scheduled_tasks = ForemanTasks::Task::DynflowTask
-        .for_action(::Actions::Katello::ContentView::Publish)
-        .where(state: 'scheduled')
-
-      if scheduled_tasks.any? { |task| scheduled_task_for_composite?(task, composite_cv) }
-        return :scheduled
-      end
-
-      # Check running tasks (these have input populated)
-      if find_active_composite_publish_tasks(composite_cv).any?
-        return :running
-      end
-
-      nil
-    end
-
-    # Schedule an event to retry composite publish after current one finishes
-    def schedule_auto_publish_event(composite_cv, description, component_task_id)
-      ::Katello::EventQueue.push_event(::Katello::Events::AutoPublishCompositeView::EVENT_TYPE, composite_cv.id) do |attrs|
-        attrs[:metadata] = { description: description, version_id: self.id, calling_task_id: component_task_id }
-      end
-    end
-
-    # Check if a scheduled task is for the given composite CV by inspecting delayed plan args
-    def scheduled_task_for_composite?(task, composite_cv)
-      delayed_plan = ForemanTasks.dynflow.world.persistence.load_delayed_plan(task.external_id)
-      return false if delayed_plan.nil?
-
-      args = delayed_plan.args
-      args.first.is_a?(::Katello::ContentView) && args.first.id == composite_cv.id
-    rescue NoMethodError, TypeError, Dynflow::Error => e
-      Rails.logger.error("Failed to check scheduled task for composite CV #{composite_cv.name}: #{e.message}")
-      false
-    end
-
-    # Find active (planning/planned/running) composite publish tasks (does NOT check scheduled tasks)
-    def find_active_composite_publish_tasks(composite_cv)
-      relevant_tasks = ForemanTasks::Task::DynflowTask
-        .for_action(::Actions::Katello::ContentView::Publish)
-        .where(state: ['planning', 'planned', 'running'])
-        .select do |task|
-          # Check if task is publishing the composite CV
-          task_input = task.input
-          task_input && task_input.dig('content_view', 'id') == composite_cv.id
-        end
-
-      relevant_tasks.map(&:external_id)
-    end
-
-    public
 
     def repository_type_counts_map
       counts = {}
