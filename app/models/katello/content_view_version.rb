@@ -44,6 +44,8 @@ module Katello
     has_many :composites, :through => :content_view_version_composites, :source => :composite_version,
              :class_name => "Katello::ContentViewVersion", :inverse_of => :components
     has_many :published_in_composite_content_views, through: :composites, source: :content_view
+    has_many :content_view_auto_publish_requests, class_name: "Katello::ContentViewAutoPublishRequest", dependent: :destroy
+
     delegate :default, :default?, to: :content_view
     delegate :rolling, :rolling?, to: :content_view
 
@@ -359,23 +361,6 @@ module Katello
         end
       end
       save!
-    end
-
-    def auto_publish_composites!(component_task_id)
-      description = _("Auto Publish - Triggered by '%s'") % self.name
-
-      self.content_view.auto_publish_components.pluck(:composite_content_view_id).each do |composite_id|
-        composite_cv = ::Katello::ContentView.find(composite_id)
-
-        # Use Dynflow chaining to coordinate composite publishes
-        # This ensures the composite waits for all running component publishes to complete
-        self.class.trigger_composite_publish_with_coordination(
-          composite_cv,
-          description,
-          self.id,
-          calling_task_id: component_task_id
-        )
-      end
     end
 
     class << self

@@ -20,5 +20,40 @@ module Katello
         )
       end
     end
+
+    def self.auto_publish_composites!(content_view_version:, calling_task_id: nil)
+      composites = content_view_version.content_view.auto_publish_composites
+      return unless composites.any?
+
+      description = _("Auto Publish - Triggered by '%s'") % content_view_version.name
+
+      composites.each do |composite|
+        # Use deduplication via request model to prevent duplicate composite publishes
+        request = composite.build_auto_publish_request
+        request.content_view_version = content_view_version
+
+        begin
+          request.save!
+          # Use Dynflow chaining for coordination with sibling component tasks
+          ::Katello::ContentViewVersion.trigger_composite_publish_with_coordination(
+            composite,
+            description,
+            content_view_version.id,
+            calling_task_id: calling_task_id
+          )
+        rescue ActiveRecord::RecordNotUnique
+          # Auto publish request already exists - skip to avoid duplicate
+          Rails.logger.info("Auto-publish request already exists for composite #{composite.name}, skipping")
+          next
+        rescue ForemanTasks::Lock::LockConflict => e
+          # Lock conflict - let it propagate
+          Rails.logger.info("Lock conflict when auto-publishing composite #{composite.name}: #{e.message}")
+          raise
+        ensure
+          # Clean up the request record after triggering the publish
+          request.destroy if request.persisted?
+        end
+      end
+    end
   end
 end
