@@ -22,7 +22,8 @@ module Katello
     end
 
     def self.auto_publish_composites!(content_view_version:, calling_task_id: nil)
-      composites = content_view_version.content_view.auto_publish_composites
+      # Use publishable_composites (fixed in 6c7f79b9f2) instead of auto_publish_composites
+      composites = content_view_version.content_view.publishable_composites
       return unless composites.any?
 
       description = _("Auto Publish - Triggered by '%s'") % content_view_version.name
