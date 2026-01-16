@@ -141,11 +141,8 @@ module Actions
 
         def auto_publish_composites(execution_plan)
           version = ::Katello::ContentViewVersion.find(input[:content_view_version_id])
-          # Pass the current execution plan ID so auto_publish can coordinate
-          # with other component CV publishes using Dynflow chaining
           ::Katello::ContentViewManager.auto_publish_composites!(
-            content_view_version: version,
-            calling_task_id: execution_plan.id
+            content_view_version: version
           )
         end
 

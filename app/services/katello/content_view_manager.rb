@@ -21,34 +21,23 @@ module Katello
       end
     end
 
-    def self.auto_publish_composites!(content_view_version:, calling_task_id: nil)
-      # Use publishable_composites (fixed in 6c7f79b9f2) instead of auto_publish_composites
+    def self.auto_publish_composites!(content_view_version:)
       composites = content_view_version.content_view.publishable_composites
       return unless composites.any?
 
-      description = _("Auto Publish - Triggered by '%s'") % content_view_version.name
-
       composites.each do |composite|
-        # Use request model for deduplication ONLY
-        # The request persists until the composite Publish task actually starts
         request = composite.build_auto_publish_request
         request.content_view_version = content_view_version
 
         begin
-          # This will raise RecordNotUnique if another component already triggered
           request.save!
 
-          # Use ALL existing chaining logic (including scheduled composite checks)
-          # Request will be cleaned up by trigger_composite_publish_with_coordination
-          ::Katello::ContentViewVersion.trigger_composite_publish_with_coordination(
-            composite,
-            description,
-            content_view_version.id,
-            calling_task_id: calling_task_id,
-            auto_publish_request: request
+          # Trigger AutoPublish action (PR #11600's approach)
+          ForemanTasks.async_task(
+            ::Actions::Katello::ContentView::AutoPublish,
+            request
           )
         rescue ActiveRecord::RecordNotUnique
-          # Another component already triggered auto-publish for this composite
           Rails.logger.info("Auto-publish already triggered for composite #{composite.name}, skipping")
           next
         end
