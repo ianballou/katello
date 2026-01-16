@@ -252,10 +252,13 @@ module ::Actions::Katello::ContentView
       # Mock execution plan with an ID
       execution_plan = mock('execution_plan', id: 'test-plan-id-123')
 
-      # Expect the version's auto_publish_composites! to be called with the execution plan ID
+      # Expect ContentViewManager to be called with execution plan ID
       version = mock(:content_view_version)
-      version.expects(:auto_publish_composites!).with('test-plan-id-123')
       Katello::ContentViewVersion.expects(:find).with(action.input[:content_view_version_id]).returns(version)
+      Katello::ContentViewManager.expects(:auto_publish_composites!).with(
+        content_view_version: version,
+        calling_task_id: 'test-plan-id-123'
+      )
 
       action.auto_publish_composites(execution_plan)
     end

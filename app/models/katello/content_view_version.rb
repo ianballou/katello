@@ -366,7 +366,29 @@ module Katello
     class << self
       # Trigger a composite publish with coordination for sibling tasks.
       # Checks for running component CV publishes and chains if necessary.
-      def trigger_composite_publish_with_coordination(composite_cv, description, triggered_by_version_id, calling_task_id: nil)
+      def trigger_composite_publish_with_coordination(composite_cv, description, triggered_by_version_id, calling_task_id: nil, auto_publish_request: nil)
+        # Check if there's already a scheduled delayed plan for this composite CV
+        # For scheduled/chained tasks, input isn't populated yet, so we check the delayed plan's args
+        has_scheduled_composite_publish = ForemanTasks::Task::DynflowTask
+          .for_action(::Actions::Katello::ContentView::Publish)
+          .where(state: 'scheduled')
+          .any? do |task|
+            begin
+              delayed_plan = ForemanTasks.dynflow.world.persistence.load_delayed_plan(task.external_id)
+              args = delayed_plan.args
+              # First arg is the content view - check if it matches our composite CV
+              args.first.is_a?(::Katello::ContentView) && args.first.id == composite_cv.id
+            rescue StandardError
+              false
+            end
+          end
+
+        if has_scheduled_composite_publish
+          Rails.logger.info("Composite CV #{composite_cv.name} publish already scheduled (delayed plan exists), skipping duplicate")
+          auto_publish_request&.destroy
+          return nil
+        end
+
         # Find currently running component CV publish tasks
         component_cv_ids = composite_cv.components.pluck(:content_view_id)
         running_tasks = ForemanTasks::Task::DynflowTask
@@ -381,12 +403,23 @@ module Katello
         # Exclude the calling component task to avoid self-dependency
         sibling_task_ids.reject! { |id| id == calling_task_id } if calling_task_id
 
-        trigger_publish_with_sibling_tasks(composite_cv, sibling_task_ids, description, triggered_by_version_id)
+        # Trigger the publish (with or without chaining)
+        result = trigger_publish_with_sibling_tasks(composite_cv, sibling_task_ids, description, triggered_by_version_id)
+
+        # Clean up the request AFTER successfully triggering the Publish task
+        # This ensures the request exists from first trigger until Publish actually starts
+        auto_publish_request&.destroy
+
+        result
       rescue ForemanTasks::Lock::LockConflict => e
+        # Clean up request on lock conflict
+        auto_publish_request&.destroy
         Rails.logger.info("Composite CV #{composite_cv.name} publish lock conflict: #{e.class} - #{e.message}")
         ::Katello::UINotifications::ContentView::AutoPublishFailure.deliver!(composite_cv)
         raise
       rescue StandardError => e
+        # Clean up request on any error
+        auto_publish_request&.destroy
         Rails.logger.error("Failed to auto-publish composite CV #{composite_cv.name}: #{e.class} - #{e.message}")
         Rails.logger.debug(e.backtrace.join("\n")) if e.backtrace
         ::Katello::UINotifications::ContentView::AutoPublishFailure.deliver!(composite_cv)
@@ -413,8 +446,6 @@ module Katello
         end
       end
     end
-
-    private
 
     def repository_type_counts_map
       counts = {}
