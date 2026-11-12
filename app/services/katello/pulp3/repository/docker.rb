@@ -8,6 +8,43 @@ module Katello
           repo.container_repository_name
         end
 
+        # TODO: Evaluate shared distribution reconciliation for other content types; preserve their recovery behavior.
+        def refresh_distributions
+          ref = distribution_reference
+          return update_distribution if ref && read_distribution(ref.href)
+
+          # A missing reference cannot prove ownership of a distribution at the target path.
+          # Leave a stale reference in place until creation succeeds.
+          create_distribution(relative_path)
+        end
+
+        def save_distribution_references(hrefs)
+          hrefs.each do |href|
+            dist = read_distribution(href)
+            fail _("The Pulp distribution could not be found after the operation completed.") unless dist
+
+            ref = distribution_reference
+            if ref && ref.href != href && read_distribution(ref.href)
+              fail _("The repository references a different existing Pulp distribution.")
+            end
+
+            guard_href = dist.content_guard
+            guard_prn = self.class.build_prn(guard_href, 'certguard', 'rhsmcertguard') if guard_href&.include?('/contentguards/certguard/rhsm/')
+            attributes = {
+              href: href,
+              path: dist.base_path,
+              prn: dist.prn,
+              content_guard_href: guard_href,
+              content_guard_prn: guard_prn,
+            }
+            if ref
+              ref.update!(attributes)
+            else
+              DistributionReference.where(attributes.merge(repository_id: repo.id)).first_or_create!
+            end
+          end
+        end
+
         def partial_repo_path
           ''
         end

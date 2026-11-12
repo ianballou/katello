@@ -326,7 +326,9 @@ module Katello
           end
 
           content_guard_prn = options.delete(:content_guard_prn) # Extract PRN and remove from options
-          distribution_reference.update(:content_guard_href => options[:content_guard], :content_guard_prn => content_guard_prn)
+          unless repo.docker?
+            distribution_reference.update(:content_guard_href => options[:content_guard], :content_guard_prn => content_guard_prn)
+          end
           response = api.distributions_api.partial_update(distribution_reference.href, options)
           # Pulp 3.90+ returns polymorphic responses (PULP-734): task when changes occur, nil when no-op
           (response.respond_to?(:task) && response.task.present?) ? [response] : []

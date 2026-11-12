@@ -14,6 +14,7 @@ module Actions
 
           # Keep the old URL for RPM vs ULN remote cleanup
           old_url = root.url
+          ::Katello::Validators::RepositoryDistributionPathValidator.validate_update!(root, repository, repo_params, user: ::User.current)
           root.update!(repo_params)
 
           if update_content?(repository)
